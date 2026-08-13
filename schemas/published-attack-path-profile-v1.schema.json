@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:radar-trace:schema:published-attack-path-profile:v1",
+  "title": "Published RADAR TRACE attack-path profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profile",
+    "reviewRecommended",
+    "reviewReasons",
+    "provenance",
+    "publication"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "published-attack-path-profile/v1"
+    },
+    "profile": {
+      "$ref": "urn:radar-trace:schema:attack-path-profile:v1"
+    },
+    "reviewRecommended": {
+      "type": "boolean"
+    },
+    "reviewReasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "provenance": {
+      "$ref": "urn:radar-trace:schema:attack-path-profile:v1#/$defs/provenance"
+    },
+    "publication": {
+      "$ref": "urn:radar-trace:schema:attack-path-profile:v1#/$defs/publication"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "reviewRecommended": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reviewReasons": {
+            "minItems": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reviewReasons": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}

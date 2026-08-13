@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:radar-trace:schema:published-attack-path-profile:v2",
+  "title": "Published RADAR TRACE attack-path profile with CVSS metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "profile", "reviewRecommended", "reviewReasons", "provenance", "publication", "cvss"],
+  "properties": {
+    "schemaVersion": {"const": "published-attack-path-profile/v2"},
+    "profile": {"$ref": "urn:radar-trace:schema:attack-path-profile:v1"},
+    "reviewRecommended": {"type": "boolean"},
+    "reviewReasons": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "provenance": {"$ref": "urn:radar-trace:schema:attack-path-profile:v1#/$defs/provenance"},
+    "publication": {"$ref": "urn:radar-trace:schema:attack-path-profile:v1#/$defs/publication"},
+    "cvss": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["version", "vector", "source", "metric"],
+        "properties": {
+          "version": {"enum": ["2.0", "3.0", "3.1", "4.0"]},
+          "vector": {"type": "string", "minLength": 1},
+          "source": {"enum": ["cna", "adp"]},
+          "sourceIndex": {"type": "integer", "minimum": 0},
+          "metric": {"enum": ["cvssV2", "cvssV3_0", "cvssV3_1", "cvssV4_0"]},
+          "baseScore": {"type": "number", "minimum": 0, "maximum": 10},
+          "baseSeverity": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "allOf": [{
+    "if": {"properties": {"reviewRecommended": {"const": true}}},
+    "then": {"properties": {"reviewReasons": {"minItems": 1}}},
+    "else": {"properties": {"reviewReasons": {"maxItems": 0}}}
+  }]
+}

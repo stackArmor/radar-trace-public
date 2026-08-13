@@ -1,0 +1,112 @@
+<mxfile host="Electron" modified="2026-08-02T12:50:00.000Z" agent="RADAR TRACE" version="24.7.17" type="device" compressed="false">
+  <diagram id="radar-trace-architecture" name="Architecture">
+    <mxGraphModel dx="1800" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="RADAR TRACE — attack-path enrichment pipeline" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#172B4D;" vertex="1" parent="1">
+          <mxGeometry x="30" y="20" width="900" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="intel-boundary" value="Generic CVE intelligence — outside the workload boundary" style="swimlane;html=1;rounded=1;startSize=38;horizontal=1;fillColor=#F8FAFC;swimlaneFillColor=#F8FAFC;strokeColor=#94A3B8;dashed=1;dashPattern=8 4;fontSize=15;fontStyle=1;fontColor=#334155;align=left;spacingLeft=14;" vertex="1" parent="1">
+          <mxGeometry x="30" y="70" width="1170" height="760" as="geometry"/>
+        </mxCell>
+        <mxCell id="consumer-boundary" value="Deployment-specific analyst triage tool" style="swimlane;html=1;rounded=1;startSize=38;horizontal=1;fillColor=#F8FAFC;swimlaneFillColor=#F8FAFC;strokeColor=#94A3B8;dashed=1;dashPattern=8 4;fontSize=15;fontStyle=1;fontColor=#334155;align=left;spacingLeft=14;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="70" width="540" height="760" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="cohort" value="&lt;b&gt;CVE cohort&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#475569&quot;&gt;JSONL or GCS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EEF3FF;strokeColor=#4667A9;fontColor=#152548;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="145" width="210" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="cve-list" value="&lt;b&gt;CVE List V5 mirror&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#475569&quot;&gt;advisories · metrics&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EEF3FF;strokeColor=#4667A9;fontColor=#152548;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="260" width="210" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="nuclei" value="&lt;b&gt;Nuclei templates&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#475569&quot;&gt;optional protocol evidence&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EEF3FF;strokeColor=#4667A9;fontColor=#152548;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="375" width="210" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="workflow" value="&lt;b&gt;Cloud Workflows&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#4C1D95&quot;&gt;orchestration · retries · run identity&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#F4EDFF;strokeColor=#7857A8;fontColor=#2B1748;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="320" y="110" width="860" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="cloud-run-label" value="Cloud Run Job — one image digest, different stage arguments" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;fontStyle=2;fontColor=#475569;" vertex="1" parent="1">
+          <mxGeometry x="500" y="192" width="530" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="collect" value="&lt;b&gt;1 · collect&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#315E52&quot;&gt;assemble evidence&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#E9F7F3;strokeColor=#27816B;fontColor=#123E34;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="320" y="235" width="140" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="prepare" value="&lt;b&gt;2 · prepare-extract&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#315E52&quot;&gt;construct requests&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#E9F7F3;strokeColor=#27816B;fontColor=#123E34;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="490" y="235" width="150" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="gemini" value="&lt;b&gt;3 · Vertex AI batch&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#4C1D95&quot;&gt;Gemini structured extraction&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#F4EDFF;strokeColor=#7857A8;fontColor=#2B1748;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="670" y="235" width="150" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="validate" value="&lt;b&gt;4 · validate&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#7F1D1D&quot;&gt;schema + evidence gate&lt;/font&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF0F0;strokeColor=#B54A4A;fontColor=#521E1E;fontSize=12;strokeWidth=1.5;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="850" y="225" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="publish" value="&lt;b&gt;5 · publish&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#315E52&quot;&gt;approved profiles&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#E9F7F3;strokeColor=#27816B;fontColor=#123E34;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="235" width="140" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="valid-label" value="valid" style="text;html=1;strokeColor=none;fillColor=#F8FAFC;align=center;verticalAlign=middle;fontSize=11;fontColor=#27816B;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="254" width="30" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="review" value="&lt;b&gt;needs-review.jsonl&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#7F1D1D&quot;&gt;invalid or unsupported&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFF0F0;strokeColor=#B54A4A;fontColor=#521E1E;fontSize=13;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="850" y="375" width="160" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="rejected-label" value="rejected" style="text;html=1;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=middle;fontSize=11;fontColor=#B54A4A;" vertex="1" parent="1">
+          <mxGeometry x="940" y="337" width="62" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="gcs" value="&lt;b&gt;Private GCS artifact plane&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#6B4A0A&quot;&gt;stage inputs + outputs · runs/{run-id}/ · manifests · fingerprints&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#FFF6DF;strokeColor=#B47A13;fontColor=#4A3108;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="310" y="535" width="840" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="import" value="&lt;b&gt;Import validated profiles&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#1E4E72&quot;&gt;versioned CVE intelligence&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EAF4FF;strokeColor=#2672A8;fontColor=#102F47;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="125" width="340" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="workload" value="&lt;b&gt;Workload context&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#1E4E72&quot;&gt;packages · configuration · runtime&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EAF4FF;strokeColor=#2672A8;fontColor=#102F47;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="265" width="215" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="network" value="&lt;b&gt;Network context&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#1E4E72&quot;&gt;ingress · egress · routes · controls&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EAF4FF;strokeColor=#2672A8;fontColor=#102F47;fontSize=14;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1515" y="265" width="215" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="join" value="&lt;b&gt;Trigger + path&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#1E4E72&quot;&gt;applicability join&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EAF4FF;strokeColor=#2672A8;fontColor=#102F47;fontSize=15;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1370" y="430" width="260" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="decision" value="&lt;b&gt;IRV / NIRV · LEV / NLEV&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#2F5D26&quot;&gt;PAIN priority · remediation evidence&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#ECF8E8;strokeColor=#4C8A3D;fontColor=#1F4118;fontSize=15;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1335" y="640" width="330" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-cohort-workflow" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#64748B;strokeWidth=1.5;" edge="1" parent="1" source="cohort" target="workflow"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-workflow-collect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.08;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=1;strokeColor=#64748B;strokeWidth=1.5;" edge="1" parent="1" source="workflow" target="collect"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-cvelist-collect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#4667A9;strokeWidth=1.5;" edge="1" parent="1" source="cve-list" target="collect"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-nuclei-collect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.78;dashed=1;endArrow=block;endFill=1;strokeColor=#4667A9;strokeWidth=1.5;" edge="1" parent="1" source="nuclei" target="collect"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e-collect-prepare" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#27816B;strokeWidth=2;" edge="1" parent="1" source="collect" target="prepare"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-prepare-gemini" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#27816B;strokeWidth=2;" edge="1" parent="1" source="prepare" target="gemini"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-gemini-validate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#7857A8;strokeWidth=2;" edge="1" parent="1" source="gemini" target="validate"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-validate-publish" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#27816B;strokeWidth=2;" edge="1" parent="1" source="validate" target="publish"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-validate-review" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=1;strokeColor=#B54A4A;strokeWidth=2;" edge="1" parent="1" source="validate" target="review"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e-collect-gcs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.0952;entryY=0;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#B47A13;strokeWidth=1.3;" edge="1" parent="1" source="collect" target="gcs"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-prepare-gcs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.3036;entryY=0;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#B47A13;strokeWidth=1.3;" edge="1" parent="1" source="prepare" target="gcs"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-gemini-gcs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5179;entryY=0;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#B47A13;strokeWidth=1.3;" edge="1" parent="1" source="gemini" target="gcs"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-review-gcs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.7381;entryY=0;endArrow=block;endFill=1;strokeColor=#B47A13;strokeWidth=1.5;" edge="1" parent="1" source="review" target="gcs"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-publish-gcs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.9524;entryY=0;endArrow=block;endFill=1;strokeColor=#B47A13;strokeWidth=1.5;" edge="1" parent="1" source="publish" target="gcs"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e-gcs-import" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#2672A8;strokeWidth=2;" edge="1" parent="1" source="gcs" target="import">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1210" y="585"/>
+              <mxPoint x="1210" y="160"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-import-join" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=1;strokeColor=#2672A8;strokeWidth=2;" edge="1" parent="1" source="import" target="join"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-workload-join" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.28;entryY=0;endArrow=block;endFill=1;strokeColor=#2672A8;strokeWidth=1.5;" edge="1" parent="1" source="workload" target="join"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-network-join" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.72;entryY=0;endArrow=block;endFill=1;strokeColor=#2672A8;strokeWidth=1.5;" edge="1" parent="1" source="network" target="join"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-join-decision" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=1;strokeColor=#4C8A3D;strokeWidth=2.5;" edge="1" parent="1" source="join" target="decision"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

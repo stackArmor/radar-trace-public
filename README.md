@@ -23,6 +23,12 @@ methodology, the JSON Schema contracts, and a point-in-time snapshot of the
 published dataset. It does not include the pipeline implementation or
 infrastructure.
 
+## Current public snapshot
+
+The current `data/` snapshot is intentionally limited to the 2,000-CVE 2026
+backfill rerun produced under the v2 contract. It is not the complete private
+registry.
+
 ## Architecture
 
 ![RADAR TRACE architecture](docs/architecture.svg)
@@ -49,10 +55,16 @@ contract changes, or the caller forces a re-run.
 
 Each profile contains a compact set of materially distinct paths rather than an
 entire exploit graph. The portable
-[attack-path profile JSON Schema](schemas/attack-path-profile-v1.schema.json)
-is the canonical `attack-path-profile/v1` contract. Every discrete taxonomy
-value has a title and definition in the schema; source IDs, locators, package
+[attack-path profile JSON Schema](schemas/attack-path-profile-v2.schema.json)
+is the current canonical `attack-path-profile/v2` contract. Version 1 remains
+immutable and readable for historical records. Every discrete taxonomy value
+has a title and definition in the schema; source IDs, locators, package
 identities, version statements, and protocol versions remain extensible.
+
+The v2 contract makes ownership explicit for attacker access, direct outcomes,
+mitigation assessment, and narrative-only conditions while preserving the
+inbound-versus-outbound path semantics. The published v2 envelope is defined by
+[`published-attack-path-profile-v2.schema.json`](schemas/published-attack-path-profile-v2.schema.json).
 
 An `attackPaths` entry describes one affected scope and one immediate vulnerable
 boundary. Entries are alternatives. Within an entry, `attackerRequirements`,

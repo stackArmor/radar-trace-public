@@ -1,0 +1,2304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:radar-trace:schema:attack-path-profile:v2",
+  "title": "RADAR TRACE attack-path profile",
+  "description": "Deployment-independent attack-path, prerequisite, mitigation, and direct-consequence intelligence for one CVE. Each attackPaths entry represents one materially distinct affected scope and exploit path. The contract does not assert deployment reachability, exploit likelihood, or business impact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "cveId",
+    "attackPaths",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "description": "Version of the core attack-path profile contract.",
+      "const": "attack-path-profile/v2"
+    },
+    "cveId": {
+      "type": "string",
+      "maxLength": 32,
+      "pattern": "^CVE-[0-9]{4}-[0-9]{4,}$",
+      "description": "Uppercase CVE identifier classified by this profile."
+    },
+    "attackPaths": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "description": "Materially distinct exploit paths. Entries are alternatives; every attackerRequirements, requiredPathCapabilities, and preconditions entry within one path is required for that path.",
+      "items": {
+        "$ref": "#/$defs/attackPath"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "description": "Source-linked claims referenced by paths, attacker requirements, access, conditions, outcomes, mitigations, and mappings.",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "Optional profile-level explanation or residual uncertainty."
+    }
+  },
+  "$defs": {
+    "attackPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pathId",
+        "affectedScope",
+        "vulnerableRole",
+        "interactionInitiator",
+        "protocols",
+        "trigger",
+        "attackerRequirements",
+        "attackerAccess",
+        "requiredPathCapabilities",
+        "preconditions",
+        "directOutcomes",
+        "mitigationAssessment",
+        "taxonomyMappings",
+        "confidence",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "pathId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "description": "Stable identifier for this affected scope and exploit-path alternative."
+        },
+        "affectedScope": {
+          "$ref": "#/$defs/affectedScope"
+        },
+        "vulnerableRole": {
+          "$ref": "#/$defs/vulnerableRole"
+        },
+        "interactionInitiator": {
+          "$ref": "#/$defs/interactionInitiator"
+        },
+        "protocols": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "description": "Protocols or protocol layers evidenced on this path. This is a descriptive set, not a Boolean expression; encode a protocol that is strictly required as a protocol precondition. An empty array means no live protocol is required, not that the protocol is unknown.",
+          "items": {
+            "$ref": "#/$defs/protocol"
+          }
+        },
+        "trigger": {
+          "$ref": "#/$defs/trigger"
+        },
+        "attackerRequirements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "description": "Typed control, influence, position, or resource requirements the attacker must satisfy. Every item is required. Authentication, authorization, execution privilege, and resource permission belong in attackerAccess.",
+          "items": {
+            "$ref": "#/$defs/attackerRequirement"
+          }
+        },
+        "attackerAccess": {
+          "$ref": "#/$defs/attackerAccess"
+        },
+        "requiredPathCapabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "description": "All end-to-end path capabilities required for this exploit-path alternative. Multiple values are conjunctive requirements.",
+          "items": {
+            "$ref": "#/$defs/pathCapability"
+          }
+        },
+        "preconditions": {
+          "type": "array",
+          "maxItems": 32,
+          "description": "All product, build, configuration, runtime, dependency, API-use, protocol-mode, user-action, or mutable-state conditions required for this path. Affected product versions belong only in affectedScope.versions.",
+          "items": {
+            "$ref": "#/$defs/conditionAtom"
+          }
+        },
+        "directOutcomes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "description": "Direct technical capabilities supported by evidence if this path succeeds. Each entry carries its own locus, privilege, confidence, and evidence.",
+          "items": {
+            "$ref": "#/$defs/directOutcome"
+          }
+        },
+        "mitigationAssessment": {
+          "$ref": "#/$defs/mitigationAssessment"
+        },
+        "taxonomyMappings": {
+          "type": "array",
+          "maxItems": 16,
+          "description": "Optional evidence-backed mappings from this concrete CVE path to CAPEC attack patterns. An empty array means no defensible mapping was established.",
+          "items": {
+            "$ref": "#/$defs/taxonomyMapping"
+          }
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Optional path-specific explanation or residual uncertainty."
+        }
+      }
+    },
+    "affectedScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Concise product/component scope for this path."
+        },
+        "vendor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Affected vendor when established by evidence."
+        },
+        "product": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Affected product when established by evidence."
+        },
+        "component": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Affected component, backend, module, binary, or library."
+        },
+        "routine": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Affected function or routine when established by evidence."
+        },
+        "packages": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "description": "Affected package identities using CVE Record Format collectionURL and packageName, with an optional Package URL for deterministic SBOM joins.",
+          "items": {
+            "$ref": "#/$defs/packageIdentity"
+          }
+        },
+        "cpes": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "description": "Affected products represented by CPE 2.3 names when established by authoritative evidence.",
+          "items": {
+            "type": "string",
+            "maxLength": 2048,
+            "pattern": "^cpe:2\\.3:"
+          }
+        },
+        "defaultStatus": {
+          "$ref": "#/$defs/versionStatus"
+        },
+        "versions": {
+          "type": "array",
+          "maxItems": 128,
+          "description": "Machine-readable affected and unaffected version statements using CVE Record Format field names.",
+          "items": {
+            "$ref": "#/$defs/affectedVersion"
+          }
+        }
+      }
+    },
+    "packageIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "collectionURL",
+        "packageName"
+      ],
+      "properties": {
+        "collectionURL": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2048,
+          "description": "URL identifying the package collection, preserving the CVE Record Format meaning."
+        },
+        "packageName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "Package name or identifier within the named collection."
+        },
+        "purl": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^pkg:",
+          "description": "Optional Package URL supplied by evidence or derived deterministically from the package identity."
+        }
+      }
+    },
+    "affectedVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "status"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "status": {
+          "$ref": "#/$defs/versionStatus"
+        },
+        "versionType": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "lessThan": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "lessThanOrEqual": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "not": {
+        "required": [
+          "lessThan",
+          "lessThanOrEqual"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "required": [
+                  "lessThan"
+                ]
+              },
+              {
+                "required": [
+                  "lessThanOrEqual"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "required": [
+              "versionType"
+            ]
+          }
+        }
+      ]
+    },
+    "versionStatus": {
+      "description": "Affected status using CVE Record Format values.",
+      "oneOf": [
+        {
+          "const": "affected",
+          "title": "Affected",
+          "description": "The product or version is affected."
+        },
+        {
+          "const": "unaffected",
+          "title": "Unaffected",
+          "description": "The product or version is unaffected."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "The affected status is not established."
+        }
+      ]
+    },
+    "vulnerableRole": {
+      "description": "Role performed by the vulnerable component at the immediate trigger boundary.",
+      "oneOf": [
+        {
+          "const": "listener",
+          "title": "Listener",
+          "description": "Accepts a remotely initiated connection or request carrying the trigger."
+        },
+        {
+          "const": "client",
+          "title": "Client",
+          "description": "Initiates an outbound interaction and is triggered while sending or processing remote data."
+        },
+        {
+          "const": "peer",
+          "title": "Peer",
+          "description": "Participates symmetrically in a protocol where either peer may initiate relevant traffic."
+        },
+        {
+          "const": "parser",
+          "title": "Parser",
+          "description": "Parses a stored or file-like artifact outside a required live protocol exchange; the artifact may still have originated remotely."
+        },
+        {
+          "const": "local-component",
+          "title": "Local component",
+          "description": "Is invoked through an in-process API, IPC, local socket, agent, command, or other host-local boundary."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown role",
+          "description": "Available evidence does not establish the vulnerable component's role at the trigger boundary."
+        }
+      ]
+    },
+    "interactionInitiator": {
+      "description": "Party that initiates the connection or local action containing the immediate vulnerable-boundary trigger.",
+      "oneOf": [
+        {
+          "const": "attacker-controlled-component",
+          "title": "Attacker-controlled component",
+          "description": "An attacker-controlled remote component initiates the interaction with the vulnerable component."
+        },
+        {
+          "const": "remote-component",
+          "title": "Remote component",
+          "description": "A remote component not controlled by the attacker initiates the interaction; attacker control lies elsewhere, such as on the traffic path."
+        },
+        {
+          "const": "vulnerable-component",
+          "title": "Vulnerable component",
+          "description": "The vulnerable component initiates the network interaction in which the trigger occurs."
+        },
+        {
+          "const": "either-peer",
+          "title": "Either peer",
+          "description": "Either participant in a symmetric peer relationship may initiate the triggering exchange."
+        },
+        {
+          "const": "upstream-component",
+          "title": "Upstream component",
+          "description": "A component between the original attacker and vulnerable component initiates or delivers the immediate interaction."
+        },
+        {
+          "const": "local-process",
+          "title": "Local process",
+          "description": "Another process on the same host initiates the local interaction."
+        },
+        {
+          "const": "user",
+          "title": "User",
+          "description": "A user action directly initiates processing of the triggering input or artifact."
+        },
+        {
+          "const": "system",
+          "title": "System",
+          "description": "A scheduler, queue consumer, background task, or operating-system action initiates processing."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown initiator",
+          "description": "Available evidence does not establish which party initiates the immediate interaction."
+        }
+      ]
+    },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "layer"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._+-]*$",
+          "not": {
+            "enum": [
+              "jndi"
+            ]
+          },
+          "description": "Canonical lowercase communication-protocol identifier, using an IANA name when available; `unknown` is reserved for unresolved protocols."
+        },
+        "layer": {
+          "$ref": "#/$defs/protocolLayer"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Optional protocol version when established by evidence."
+        }
+      }
+    },
+    "protocolLayer": {
+      "description": "Communication layer at which the protocol operates. APIs and naming mechanisms such as JNDI are preconditions, not protocols.",
+      "oneOf": [
+        {
+          "const": "application",
+          "title": "Application",
+          "description": "Application-layer communication protocol such as HTTP, LDAP, DNS, or RMI."
+        },
+        {
+          "const": "security",
+          "title": "Security",
+          "description": "Security or channel-protection protocol such as TLS."
+        },
+        {
+          "const": "transport",
+          "title": "Transport",
+          "description": "Transport protocol such as TCP, UDP, SCTP, or QUIC."
+        },
+        {
+          "const": "network",
+          "title": "Network",
+          "description": "Network-layer protocol such as IP or ICMP."
+        },
+        {
+          "const": "local-ipc",
+          "title": "Local IPC",
+          "description": "Host-local communication mechanism such as a Unix-domain socket or named pipe."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "The available evidence does not establish the protocol layer."
+        }
+      ]
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Immediate event at the vulnerable component boundary. Later callbacks or delivery mechanisms belong in requiredPathCapabilities and attackerRequirements.",
+      "required": [
+        "phase",
+        "artifact",
+        "directionAtBoundary"
+      ],
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/triggerPhase"
+        },
+        "artifact": {
+          "$ref": "#/$defs/triggerArtifact"
+        },
+        "directionAtBoundary": {
+          "$ref": "#/$defs/boundaryDirection"
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Optional concise description of the triggering operation or sequence."
+        }
+      }
+    },
+    "triggerPhase": {
+      "description": "Processing phase in which vulnerable behavior is activated.",
+      "oneOf": [
+        {
+          "const": "connection-establishment",
+          "title": "Connection establishment",
+          "description": "The vulnerability is activated while establishing or negotiating a connection or session."
+        },
+        {
+          "const": "inbound-request-processing",
+          "title": "Inbound request processing",
+          "description": "The vulnerable component processes a remotely initiated request."
+        },
+        {
+          "const": "remote-response-processing",
+          "title": "Remote response processing",
+          "description": "The vulnerable component processes data returned by a remote endpoint."
+        },
+        {
+          "const": "protocol-message-processing",
+          "title": "Protocol message processing",
+          "description": "The vulnerable component processes a protocol message or frame not usefully modeled as a request or response."
+        },
+        {
+          "const": "outbound-operation",
+          "title": "Outbound operation",
+          "description": "Vulnerable behavior occurs while constructing or sending an outbound operation."
+        },
+        {
+          "const": "scheduled-processing",
+          "title": "Scheduled processing",
+          "description": "A scheduler, queue, deferred task, or background worker activates vulnerable behavior after input was stored."
+        },
+        {
+          "const": "file-parsing",
+          "title": "File parsing",
+          "description": "Parsing a stored file or file-like artifact activates vulnerable behavior."
+        },
+        {
+          "const": "local-invocation",
+          "title": "Local invocation",
+          "description": "An in-process API, IPC, command, agent, or other local call activates vulnerable behavior."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown phase",
+          "description": "Available evidence establishes a path but not the processing phase."
+        }
+      ]
+    },
+    "triggerArtifact": {
+      "description": "Concrete data unit, object, or action processed at the immediate trigger boundary.",
+      "oneOf": [
+        {
+          "const": "connection",
+          "title": "Connection",
+          "description": "Connection setup state or parameters are the triggering artifact."
+        },
+        {
+          "const": "request",
+          "title": "Request",
+          "description": "A request or outbound request operation is the triggering artifact."
+        },
+        {
+          "const": "response",
+          "title": "Response",
+          "description": "A remote response is the triggering artifact."
+        },
+        {
+          "const": "redirect",
+          "title": "Redirect",
+          "description": "A redirect instruction or redirect-derived state is the triggering artifact."
+        },
+        {
+          "const": "handshake",
+          "title": "Handshake",
+          "description": "Protocol negotiation or handshake data is the triggering artifact."
+        },
+        {
+          "const": "message",
+          "title": "Message",
+          "description": "A protocol message is the triggering artifact."
+        },
+        {
+          "const": "frame",
+          "title": "Frame",
+          "description": "A protocol frame, packet-level unit, or frame sequence is the triggering artifact."
+        },
+        {
+          "const": "file",
+          "title": "File",
+          "description": "A file, archive, document, media object, or other stored artifact is the trigger."
+        },
+        {
+          "const": "api-arguments",
+          "title": "API arguments",
+          "description": "Arguments passed through an application or library API are the trigger."
+        },
+        {
+          "const": "local-input",
+          "title": "Local input",
+          "description": "Host-local input outside a more specific API or file category is the trigger."
+        },
+        {
+          "const": "stored-state",
+          "title": "Stored state",
+          "description": "Previously stored attacker-influenced state is processed later."
+        },
+        {
+          "const": "none",
+          "title": "No new artifact",
+          "description": "Activation does not require a new artifact to cross the vulnerable boundary."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown artifact",
+          "description": "Available evidence does not establish the concrete triggering artifact."
+        }
+      ]
+    },
+    "boundaryDirection": {
+      "description": "Direction in which the triggering artifact crosses the immediate vulnerable-component boundary.",
+      "oneOf": [
+        {
+          "const": "remote-to-vulnerable",
+          "title": "Remote to vulnerable",
+          "description": "The trigger moves from a remote component into the vulnerable component."
+        },
+        {
+          "const": "vulnerable-to-remote",
+          "title": "Vulnerable to remote",
+          "description": "The vulnerable component emits the operation whose construction or transmission activates the behavior."
+        },
+        {
+          "const": "bidirectional",
+          "title": "Bidirectional",
+          "description": "Activation materially depends on state or data crossing the boundary in both directions."
+        },
+        {
+          "const": "local-to-vulnerable",
+          "title": "Local to vulnerable",
+          "description": "The trigger reaches the vulnerable component through an in-process or host-local boundary."
+        },
+        {
+          "const": "none",
+          "title": "No boundary crossing",
+          "description": "No new data crosses the boundary at activation, as with processing of previously stored state."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown direction",
+          "description": "Available evidence does not establish the triggering direction."
+        }
+      ]
+    },
+    "attackerRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Path-local attacker control, influence, position, or resource prerequisite. Access credentials and privileges belong in attackerAccess.",
+      "required": [
+        "id",
+        "kind",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/localIdentifier"
+        },
+        "kind": {
+          "$ref": "#/$defs/attackerRequirementKind"
+        },
+        "endpointRole": {
+          "$ref": "#/$defs/endpointRole"
+        },
+        "requirementValue": {
+          "$ref": "#/$defs/attackerRequirementValue"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "endpoint-control"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "endpointRole"
+            ],
+            "properties": {
+              "requirementValue": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "network-position"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "requirementValue"
+            ],
+            "properties": {
+              "endpointRole": false,
+              "requirementValue": {
+                "const": "traffic-path"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "input-control"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "requirementValue"
+            ],
+            "properties": {
+              "endpointRole": false,
+              "requirementValue": {
+                "enum": [
+                  "untrusted-input",
+                  "dns-response"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "local-access"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "requirementValue"
+            ],
+            "properties": {
+              "endpointRole": false,
+              "requirementValue": {
+                "enum": [
+                  "local-user",
+                  "local-process"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unknown"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "requirementValue"
+            ],
+            "properties": {
+              "endpointRole": false,
+              "requirementValue": {
+                "const": "unknown"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "localIdentifier": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "description": "Stable path-local identifier."
+    },
+    "endpointRole": {
+      "description": "Most-specific attacker-controlled endpoint role at one identified control point.",
+      "oneOf": [
+        {
+          "const": "remote-client",
+          "title": "Remote client",
+          "description": "Attacker-controlled remote initiating endpoint."
+        },
+        {
+          "const": "remote-endpoint",
+          "title": "Remote endpoint",
+          "description": "Generic attacker-controlled destination contacted by the vulnerable component."
+        },
+        {
+          "const": "redirect-target",
+          "title": "Redirect target",
+          "description": "Attacker-controlled destination selected through redirect behavior; a specialization of remote-endpoint."
+        },
+        {
+          "const": "proxy",
+          "title": "Proxy",
+          "description": "Attacker-controlled proxy; a specialization of remote-endpoint."
+        },
+        {
+          "const": "network-peer",
+          "title": "Network peer",
+          "description": "Attacker-controlled participant in a symmetric or federated protocol."
+        }
+      ]
+    },
+    "attackerRequirementKind": {
+      "description": "Category of attacker prerequisite.",
+      "oneOf": [
+        {
+          "const": "endpoint-control",
+          "title": "Endpoint control",
+          "description": "Control or influence of a remote endpoint or protocol peer."
+        },
+        {
+          "const": "network-position",
+          "title": "Network position",
+          "description": "Ability to observe or manipulate a traffic path."
+        },
+        {
+          "const": "input-control",
+          "title": "Input control",
+          "description": "Control or manipulation of an input object or response."
+        },
+        {
+          "const": "local-access",
+          "title": "Local access",
+          "description": "A user or process position on the vulnerable host."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "The category of attacker prerequisite is unresolved."
+        }
+      ]
+    },
+    "attackerRequirementValue": {
+      "description": "Specific non-endpoint attacker-controlled object, position, or local actor. Endpoint-control requirements use endpointRole.",
+      "oneOf": [
+        {
+          "const": "traffic-path",
+          "title": "Traffic path",
+          "description": "On-path observation or manipulation position."
+        },
+        {
+          "const": "untrusted-input",
+          "title": "Untrusted input",
+          "description": "Attacker-controlled input or value reaching vulnerable code."
+        },
+        {
+          "const": "dns-response",
+          "title": "DNS response",
+          "description": "Attacker-controlled or manipulated DNS answer or state."
+        },
+        {
+          "const": "local-user",
+          "title": "Local user",
+          "description": "User identity or interactive position on the vulnerable host."
+        },
+        {
+          "const": "local-process",
+          "title": "Local process",
+          "description": "Same-host process, API caller, agent, or IPC participant."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "The specific attacker prerequisite is unresolved."
+        }
+      ]
+    },
+    "attackerAccess": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Authentication, authorization, execution privilege, and resource permission the attacker must possess. Empty arrays explicitly mean no requirement in that dimension; unknown authentication is never inferred as not-required.",
+      "required": [
+        "authentication",
+        "authorization",
+        "executionPrivileges",
+        "resourcePermissions",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "authentication": {
+          "$ref": "#/$defs/authenticationAccess"
+        },
+        "authorization": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/accessConstraint"
+          }
+        },
+        "executionPrivileges": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/accessConstraint"
+          }
+        },
+        "resourcePermissions": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/accessConstraint"
+          }
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      }
+    },
+    "authenticationAccess": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement"
+      ],
+      "properties": {
+        "requirement": {
+          "$ref": "#/$defs/authenticationRequirement"
+        },
+        "realm": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "requirement": {
+                "const": "specific-role"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "role"
+            ]
+          },
+          "else": {
+            "properties": {
+              "role": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "requirement": {
+                "enum": [
+                  "not-required",
+                  "not-applicable",
+                  "unknown"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "realm": false
+            }
+          }
+        }
+      ]
+    },
+    "authenticationRequirement": {
+      "description": "Authentication state the attacker must satisfy. Unknown is distinct from not-required.",
+      "oneOf": [
+        {
+          "const": "not-required",
+          "title": "Not required",
+          "description": "The path requires no authenticated identity."
+        },
+        {
+          "const": "valid-account",
+          "title": "Valid account",
+          "description": "Any valid account in the stated realm is required."
+        },
+        {
+          "const": "specific-role",
+          "title": "Specific role",
+          "description": "A valid identity holding a named product role is required."
+        },
+        {
+          "const": "administrative",
+          "title": "Administrative",
+          "description": "An administrative identity is required."
+        },
+        {
+          "const": "not-applicable",
+          "title": "Not applicable",
+          "description": "Authentication has no meaning for this path."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "Evidence does not establish whether authentication is required."
+        }
+      ]
+    },
+    "accessConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheme",
+        "value"
+      ],
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "pathCapability": {
+      "description": "End-to-end path capability required for exploitation, independent of whether a deployment provides it.",
+      "oneOf": [
+        {
+          "const": "remote-initiated-ingress",
+          "title": "Remote-initiated ingress",
+          "description": "A remote component must be able to initiate and send an interaction toward the vulnerable listener, directly or through intermediaries; attacker control of that component is represented separately."
+        },
+        {
+          "const": "vulnerable-component-initiated-egress",
+          "title": "Component-initiated egress",
+          "description": "The vulnerable component must initiate or continue an outbound interaction to an attacker-controlled or influenced control point."
+        },
+        {
+          "const": "on-path-interception",
+          "title": "On-path interception",
+          "description": "The attacker must observe or manipulate traffic in transit."
+        },
+        {
+          "const": "peer-network-interaction",
+          "title": "Peer network interaction",
+          "description": "The vulnerable component must exchange traffic with an attacker-controlled protocol peer."
+        },
+        {
+          "const": "local-input-transfer",
+          "title": "Local input transfer",
+          "description": "Attacker-influenced data must reach vulnerable code through a file, API, IPC, command, user action, logging, templating, or another local transfer. The original attacker need not be local."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown path capability",
+          "description": "Available evidence does not establish the required end-to-end path capability."
+        }
+      ]
+    },
+    "precondition": {
+      "$ref": "#/$defs/conditionAtom"
+    },
+    "conditionAtom": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A bounded product-state predicate, an explicitly narrative-only condition, or an unknown condition. The same structure is used by preconditions and mitigation options.",
+      "required": [
+        "id",
+        "kind",
+        "resolution",
+        "description",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/localIdentifier"
+        },
+        "kind": {
+          "$ref": "#/$defs/preconditionKind"
+        },
+        "resolution": {
+          "$ref": "#/$defs/conditionResolution"
+        },
+        "condition": {
+          "$ref": "#/$defs/structuredCondition"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Concise evidence-backed condition. Narrative text is never treated as a machine predicate."
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "resolution": {
+                "const": "structured"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "condition"
+            ]
+          },
+          "else": {
+            "properties": {
+              "condition": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "configuration"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "setting"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "runtime-feature"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "feature"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "build-option"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "option"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "dependency"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "dependency"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "api-usage"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "api"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "protocol"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "protocolFeature"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "state"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "state"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "user-action"
+              },
+              "resolution": {
+                "const": "structured"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "condition": {
+                "required": [
+                  "action"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "other"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "resolution": {
+                "enum": [
+                  "narrative-only",
+                  "unknown"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "conditionResolution": {
+      "description": "Whether a condition is safely machine-resolvable from a bounded predicate.",
+      "oneOf": [
+        {
+          "const": "structured",
+          "title": "Structured",
+          "description": "Evidence supports a stable typed identity, operator, and value."
+        },
+        {
+          "const": "narrative-only",
+          "title": "Narrative only",
+          "description": "Evidence supports the condition but not a stable machine predicate."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "Evidence does not establish the material condition."
+        }
+      ]
+    },
+    "structuredCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 2,
+      "required": [
+        "operator"
+      ],
+      "properties": {
+        "setting": {
+          "$ref": "#/$defs/conditionSubject"
+        },
+        "feature": {
+          "$ref": "#/$defs/conditionSubject"
+        },
+        "option": {
+          "$ref": "#/$defs/conditionSubject"
+        },
+        "dependency": {
+          "$ref": "#/$defs/dependencyCondition"
+        },
+        "api": {
+          "$ref": "#/$defs/conditionSubject"
+        },
+        "protocolFeature": {
+          "$ref": "#/$defs/conditionSubject"
+        },
+        "state": {
+          "$ref": "#/$defs/conditionSubject"
+        },
+        "action": {
+          "$ref": "#/$defs/conditionSubject"
+        },
+        "operator": {
+          "$ref": "#/$defs/conditionOperator"
+        },
+        "value": {
+          "$ref": "#/$defs/conditionValue"
+        }
+      }
+    },
+    "conditionSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheme",
+        "id"
+      ],
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "dependencyCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "purl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "pattern": "^pkg:[^\\s]+$"
+        },
+        "version": {
+          "$ref": "#/$defs/versionConstraint"
+        }
+      }
+    },
+    "versionConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "lessThan": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "lessThanOrEqual": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "versionType": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "lessThan",
+              "lessThanOrEqual"
+            ]
+          }
+        },
+        {
+          "if": {
+            "anyOf": [
+              {
+                "required": [
+                  "lessThan"
+                ]
+              },
+              {
+                "required": [
+                  "lessThanOrEqual"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "required": [
+              "versionType"
+            ]
+          }
+        }
+      ]
+    },
+    "conditionOperator": {
+      "description": "Small operator set used for exact machine comparison; no free-form expressions.",
+      "oneOf": [
+        {
+          "const": "equals",
+          "title": "Equals",
+          "description": "The subject equals the supplied value."
+        },
+        {
+          "const": "not-equals",
+          "title": "Not equals",
+          "description": "The subject does not equal the supplied value."
+        },
+        {
+          "const": "enabled",
+          "title": "Enabled",
+          "description": "The subject is enabled."
+        },
+        {
+          "const": "disabled",
+          "title": "Disabled",
+          "description": "The subject is disabled."
+        },
+        {
+          "const": "present",
+          "title": "Present",
+          "description": "The subject is present."
+        },
+        {
+          "const": "absent",
+          "title": "Absent",
+          "description": "The subject is absent."
+        },
+        {
+          "const": "matches",
+          "title": "Matches",
+          "description": "The subject matches the supplied bounded value."
+        }
+      ]
+    },
+    "conditionValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "string": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "boolean": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "number"
+        }
+      }
+    },
+    "preconditionKind": {
+      "description": "Type of product, build, configuration, runtime, dependency, API-use, protocol-mode, user-action, or mutable-state condition.",
+      "oneOf": [
+        {
+          "const": "configuration",
+          "title": "Configuration",
+          "description": "Required configuration setting or value."
+        },
+        {
+          "const": "build-option",
+          "title": "Build option",
+          "description": "Compile-time option or packaged feature."
+        },
+        {
+          "const": "runtime-feature",
+          "title": "Runtime feature",
+          "description": "Feature or code path that must be active at runtime."
+        },
+        {
+          "const": "protocol",
+          "title": "Protocol",
+          "description": "Protocol, extension, or protocol behavior that must be enabled."
+        },
+        {
+          "const": "dependency",
+          "title": "Dependency",
+          "description": "Required dependent component, library, service, or module."
+        },
+        {
+          "const": "api-usage",
+          "title": "API usage",
+          "description": "Required API, function, flag, or calling pattern."
+        },
+        {
+          "const": "state",
+          "title": "State",
+          "description": "Required data, session, cache, lifecycle, or other mutable state."
+        },
+        {
+          "const": "user-action",
+          "title": "User action",
+          "description": "Required action by a user or operator."
+        },
+        {
+          "const": "other",
+          "title": "Other",
+          "description": "Material condition not represented by another kind."
+        }
+      ]
+    },
+    "directOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcomeId",
+        "primitive",
+        "locus",
+        "privilegeObtained",
+        "description",
+        "confidence",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "outcomeId": {
+          "$ref": "#/$defs/localIdentifier"
+        },
+        "primitive": {
+          "$ref": "#/$defs/outcomePrimitive"
+        },
+        "locus": {
+          "$ref": "#/$defs/outcomeLocus"
+        },
+        "privilegeObtained": {
+          "$ref": "#/$defs/privilegeObtained"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "properties": {
+                  "primitive": {
+                    "const": "unknown"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "locus": {
+                    "const": "unknown"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "privilegeObtained": {
+                    "const": "unknown"
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "medium",
+                  "low"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "outcomePrimitive": {
+      "description": "Direct technical capability obtained at the locus.",
+      "oneOf": [
+        {
+          "const": "code-execution",
+          "title": "Code execution",
+          "description": "Attacker-chosen instructions or script execute at the locus."
+        },
+        {
+          "const": "memory-corruption",
+          "title": "Memory corruption",
+          "description": "Memory outside intended bounds is influenced without demonstrated execution."
+        },
+        {
+          "const": "authentication-bypass",
+          "title": "Authentication bypass",
+          "description": "Authentication is skipped, forged, or satisfied without valid credentials."
+        },
+        {
+          "const": "authorization-bypass",
+          "title": "Authorization bypass",
+          "description": "A principal reaches operations or data outside its permitted set."
+        },
+        {
+          "const": "information-disclosure",
+          "title": "Information disclosure",
+          "description": "Data the attacker is not entitled to is revealed."
+        },
+        {
+          "const": "data-tampering",
+          "title": "Data tampering",
+          "description": "Data or state is modified without authorization."
+        },
+        {
+          "const": "delegated-access",
+          "title": "Delegated access",
+          "description": "The locus lends its network position, identity, or credentials on the attacker's behalf."
+        },
+        {
+          "const": "denial-of-service",
+          "title": "Denial of service",
+          "description": "Availability or capacity at the locus is degraded or exhausted."
+        },
+        {
+          "const": "cryptographic-weakening",
+          "title": "Cryptographic weakening",
+          "description": "A confidentiality, integrity, identity, or freshness guarantee is reduced."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "Evidence does not establish the direct technical capability."
+        }
+      ]
+    },
+    "outcomeLocus": {
+      "description": "Asset class where the direct consequence lands.",
+      "oneOf": [
+        {
+          "const": "vulnerable-component",
+          "title": "Vulnerable component",
+          "description": "The affected process or component itself."
+        },
+        {
+          "const": "host",
+          "title": "Host",
+          "description": "The machine beyond the affected component."
+        },
+        {
+          "const": "interacting-client",
+          "title": "Interacting client",
+          "description": "A user, browser, or client interacting with the vulnerable component."
+        },
+        {
+          "const": "downstream-component",
+          "title": "Downstream component",
+          "description": "A component contacted on the attacker's behalf."
+        },
+        {
+          "const": "stored-state",
+          "title": "Stored state",
+          "description": "Persistent data or artifacts outside process lifetime."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "Evidence does not establish where the consequence lands."
+        }
+      ]
+    },
+    "privilegeObtained": {
+      "description": "Privilege obtained relative to the outcome locus.",
+      "oneOf": [
+        {
+          "const": "none",
+          "title": "None",
+          "description": "No new privilege is obtained at the locus."
+        },
+        {
+          "const": "same-as-locus",
+          "title": "Same as locus",
+          "description": "The attacker acts with the locus's existing authority."
+        },
+        {
+          "const": "elevated-within-locus",
+          "title": "Elevated within locus",
+          "description": "Authority increases within the locus without full control."
+        },
+        {
+          "const": "full-control-of-locus",
+          "title": "Full control",
+          "description": "The attacker gains full control of the locus."
+        },
+        {
+          "const": "unknown",
+          "title": "Unknown",
+          "description": "Evidence does not establish the obtained privilege."
+        }
+      ]
+    },
+    "mitigationAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "options"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/mitigationAssessmentStatus"
+        },
+        "options": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/mitigationOption"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "documented"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "options": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "options": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "mitigationAssessmentStatus": {
+      "description": "Result of assessing qualifying mitigations in the collected evidence.",
+      "oneOf": [
+        {
+          "const": "documented",
+          "title": "Documented",
+          "description": "At least one qualifying product control is supported by collected evidence."
+        },
+        {
+          "const": "none-supported-by-collected-evidence",
+          "title": "None supported",
+          "description": "No qualifying control was supported by collected evidence; this is not proof that none exists."
+        },
+        {
+          "const": "inconclusive",
+          "title": "Inconclusive",
+          "description": "Collected evidence is too sparse, ambiguous, or contradictory to assess mitigations."
+        }
+      ]
+    },
+    "mitigationOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mitigationId",
+        "conditions",
+        "effect",
+        "description",
+        "confidence",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "mitigationId": {
+          "$ref": "#/$defs/localIdentifier"
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "description": "Conditions that must all hold for this mitigation option; options are alternatives.",
+          "items": {
+            "$ref": "#/$defs/conditionAtom"
+          }
+        },
+        "effect": {
+          "$ref": "#/$defs/mitigationEffect"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        },
+        "replacedOutcomeRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/localIdentifier"
+          }
+        },
+        "residualOutcomes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/directOutcome"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "effect": {
+                "const": "alters-outcomes"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "replacedOutcomeRefs",
+              "residualOutcomes"
+            ]
+          },
+          "else": {
+            "properties": {
+              "replacedOutcomeRefs": false,
+              "residualOutcomes": false
+            }
+          }
+        }
+      ]
+    },
+    "mitigationEffect": {
+      "description": "Effect of a fully satisfied mitigation option.",
+      "oneOf": [
+        {
+          "const": "prevents-path",
+          "title": "Prevents path",
+          "description": "The exploit path cannot complete."
+        },
+        {
+          "const": "alters-outcomes",
+          "title": "Alters outcomes",
+          "description": "The path completes with explicitly different direct outcomes."
+        },
+        {
+          "const": "raises-difficulty",
+          "title": "Raises difficulty",
+          "description": "The path remains possible but materially less reliable or practical."
+        }
+      ]
+    },
+    "taxonomyMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taxonomyName",
+        "taxonomyVersion",
+        "taxonomyId",
+        "relationship",
+        "confidence",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "taxonomyName": {
+          "const": "CAPEC",
+          "description": "The mapped external taxonomy. CAPEC is the supported attack-pattern taxonomy for this contract."
+        },
+        "taxonomyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Version of CAPEC used for the mapping."
+        },
+        "taxonomyId": {
+          "type": "string",
+          "pattern": "^CAPEC-[1-9][0-9]*$",
+          "maxLength": 32,
+          "description": "CAPEC attack-pattern identifier."
+        },
+        "relationship": {
+          "$ref": "#/$defs/taxonomyRelationship"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      }
+    },
+    "taxonomyRelationship": {
+      "description": "Relationship between this concrete CVE attack path and the CAPEC pattern.",
+      "oneOf": [
+        {
+          "const": "instance-of",
+          "title": "Instance of",
+          "description": "The CVE attack path is a concrete instance of the CAPEC attack pattern."
+        },
+        {
+          "const": "related-to",
+          "title": "Related to",
+          "description": "The CAPEC pattern is materially related but does not fully characterize the CVE attack path."
+        }
+      ]
+    },
+    "confidence": {
+      "description": "Strength of evidence supporting the path, outcome, mitigation, or mapping that carries this value. It is not exploit likelihood or source completeness.",
+      "oneOf": [
+        {
+          "const": "high",
+          "title": "High confidence",
+          "description": "Authoritative or direct technical evidence explicitly establishes every material field of the carrying object; high confidence cannot contain unknown values."
+        },
+        {
+          "const": "medium",
+          "title": "Medium confidence",
+          "description": "The carrying object is well supported, but at least one material detail depends on reasonable inference or incomplete evidence."
+        },
+        {
+          "const": "low",
+          "title": "Low confidence",
+          "description": "The carrying object is provisional because evidence is sparse, ambiguous, indirect, or contradictory; publication must carry a review recommendation."
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceId",
+        "sourceId",
+        "sourceType",
+        "claim",
+        "locator",
+        "pathRefs",
+        "strength"
+      ],
+      "properties": {
+        "evidenceId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "description": "Stable identifier referenced from path-scoped evidence-backed fields."
+        },
+        "sourceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Identifier of a source present in the collected source record."
+        },
+        "sourceType": {
+          "$ref": "#/$defs/evidenceSourceType"
+        },
+        "claim": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Material attack-path claim supported by the source."
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Precise source location such as a CVE JSON path, advisory section, commit line, or template block."
+        },
+        "pathRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "description": "Path IDs to which this claim applies, whether it supports or contradicts them.",
+          "items": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9._-]*$"
+          }
+        },
+        "strength": {
+          "$ref": "#/$defs/evidenceStrength"
+        }
+      }
+    },
+    "evidenceSourceType": {
+      "description": "Kind of source containing the cited claim.",
+      "oneOf": [
+        {
+          "const": "cve-record",
+          "title": "CVE record",
+          "description": "CVE List V5 CNA or ADP record content."
+        },
+        {
+          "const": "vendor-advisory",
+          "title": "Vendor advisory",
+          "description": "Official affected-product vendor advisory."
+        },
+        {
+          "const": "upstream-patch",
+          "title": "Upstream patch",
+          "description": "Upstream source patch, commit, or code review."
+        },
+        {
+          "const": "distro-advisory",
+          "title": "Distribution advisory",
+          "description": "Operating-system or package-distribution advisory."
+        },
+        {
+          "const": "vex-statement",
+          "title": "VEX statement",
+          "description": "Vulnerability-exploitability exchange statement in CSAF, OpenVEX, CycloneDX, or another identified VEX format."
+        },
+        {
+          "const": "osv",
+          "title": "OSV",
+          "description": "Official Open Source Vulnerabilities ecosystem record."
+        },
+        {
+          "const": "ghsa",
+          "title": "GitHub Security Advisory",
+          "description": "GitHub Security Advisory record."
+        },
+        {
+          "const": "nuclei-template",
+          "title": "Nuclei template",
+          "description": "Nuclei template used only as supporting evidence for its concrete test behavior."
+        },
+        {
+          "const": "capec",
+          "title": "CAPEC",
+          "description": "MITRE CAPEC attack-pattern record used to support an external taxonomy mapping."
+        },
+        {
+          "const": "other",
+          "title": "Other source",
+          "description": "Another explicitly identified source type."
+        }
+      ]
+    },
+    "evidenceStrength": {
+      "description": "Relationship between the source and cited claim.",
+      "oneOf": [
+        {
+          "const": "explicit",
+          "title": "Explicit",
+          "description": "The source directly states or demonstrates the claim."
+        },
+        {
+          "const": "inferred",
+          "title": "Inferred",
+          "description": "The claim is a necessary or reasonable inference from the source."
+        },
+        {
+          "const": "corroborating",
+          "title": "Corroborating",
+          "description": "The source supports a claim established more directly elsewhere."
+        },
+        {
+          "const": "contradictory",
+          "title": "Contradictory",
+          "description": "The source materially conflicts with another cited path claim and requires review."
+        }
+      ]
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 128,
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validatedAt",
+        "sourceFingerprint",
+        "profileFingerprint"
+      ],
+      "properties": {
+        "validatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profileFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "modelVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalizations": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "publishedAt",
+        "status",
+        "artifactFingerprint"
+      ],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "const": "published"
+        },
+        "artifactFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

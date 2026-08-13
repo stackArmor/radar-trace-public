@@ -343,6 +343,15 @@ version, exact vector string, source, metric key, and available base score and
 severity). This metadata is deterministic and does not participate in the
 attack-path analysis/cache identity.
 
+## Using a profile
+
+A profile states generic path requirements. Turning that into a decision about
+a specific deployment is the consumer's job, and it is easy to do unsoundly.
+[Reachability gates](docs/reachability-gates.md) documents the join: the order
+the requirements should be tested in, the four dispositions a finding can
+resolve to, why failing to prove a path open is not the same as proving it
+closed, and the specific inferences the procedure must refuse to make.
+
 ## Data snapshot
 
 The `data/` directory in this repository is a point-in-time export of the

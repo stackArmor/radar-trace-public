@@ -1919,6 +1919,7 @@
       "additionalProperties": false,
       "required": [
         "mitigationId",
+        "controlKind",
         "conditions",
         "effect",
         "description",
@@ -1928,6 +1929,9 @@
       "properties": {
         "mitigationId": {
           "$ref": "#/$defs/localIdentifier"
+        },
+        "controlKind": {
+          "$ref": "#/$defs/mitigationControlKind"
         },
         "conditions": {
           "type": "array",
@@ -1991,6 +1995,36 @@
               "residualOutcomes": false
             }
           }
+        }
+      ]
+    },
+    "mitigationControlKind": {
+      "description": "Kind of control this option is. A documented option is an independent control; moving to a fixed version is already carried by affectedScope.versions and is not one.",
+      "oneOf": [
+        {
+          "const": "configuration",
+          "title": "Configuration",
+          "description": "A setting, policy, or module-loading change applied to the affected component."
+        },
+        {
+          "const": "access-restriction",
+          "title": "Access restriction",
+          "description": "Restricting which principals, networks, or callers may reach or exercise the component."
+        },
+        {
+          "const": "usage-change",
+          "title": "Usage change",
+          "description": "A caller-side code or API-usage change that avoids the vulnerable behaviour."
+        },
+        {
+          "const": "operational-control",
+          "title": "Operational control",
+          "description": "A procedural, monitoring, or custody control outside the component itself."
+        },
+        {
+          "const": "version-upgrade",
+          "title": "Version upgrade",
+          "description": "Moving to a fixed version, applying a patch, or upgrading a dependency. Never an independent control."
         }
       ]
     },

@@ -12,6 +12,14 @@ attacker access, direct outcomes, mitigation assessment, and narrative-only
 conditions while preserving evidence links and inbound-versus-outbound path
 semantics. Version 1 remains immutable and readable for historical data.
 
+Each `mitigationAssessment.options` entry carries a required `controlKind`
+stating what the option actually is: `configuration`, `access-restriction`,
+`usage-change`, `operational-control`, or `version-upgrade`. Only independent
+controls are published, so `version-upgrade` never appears in `data/`: moving to
+a fixed release is already carried by `affectedScope.versions` and is not a
+mitigation. The value remains in the enum because the contract names the kind it
+excludes rather than leaving it implied.
+
 `published-attack-path-profile-v1.schema.json` wraps the core profile with
 publication provenance (`reviewRecommended`, `reviewReasons`, `provenance`,
 `publication`).

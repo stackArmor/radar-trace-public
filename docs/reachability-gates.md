@@ -121,6 +121,12 @@ option are an AND-set.
 | Annotate | `raises-difficulty`: record it, do not act on it. It is the floor value, not a control. |
 | Continue | `none-supported-by-collected-evidence` carries *no information*. It never means no mitigation exists. |
 
+Every option states a `controlKind`, and only independent controls are published.
+Upgrading is not one of them, so this gate never refutes a path on the grounds
+that a fixed release exists; that fact belongs to G0 and `affectedScope.versions`.
+A `documented` status therefore asserts a control applicable *without* changing
+version.
+
 ### G2 — Required path capabilities
 
 The core discriminator, and the one fact no scanner emits. All capabilities in

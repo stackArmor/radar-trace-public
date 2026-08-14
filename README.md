@@ -25,9 +25,17 @@ infrastructure.
 
 ## Current public snapshot
 
-The current `data/` snapshot is intentionally limited to the 2,000-CVE 2026
-backfill rerun produced under the v2 contract. It is not the complete private
-registry.
+The current `data/` snapshot holds the 998 profiles published so far under the
+v2 contract: the CVE-2026 backfill plus `CVE-2021-44228`, re-analysed under v2
+because it is referenced as an example below.
+
+Coverage grows from here. The v2 contract and the pipeline that produces it are
+settled, so extending the corpus is a matter of running historical cohorts
+through it; snapshots are refreshed as those batches complete. Earlier years
+currently published under the superseded v1 core are re-analysed rather than
+converted, because v2 records fields v1 never captured.
+
+This snapshot is not the complete private registry.
 
 ## Architecture
 
@@ -137,56 +145,107 @@ and [Apache Log4j security advisory](https://logging.apache.org/security.html#CV
 
 ```json
 {
-  "schemaVersion": "attack-path-profile/v1",
-  "cveId": "CVE-2023-44487",
   "attackPaths": [
     {
-      "pathId": "http2-rapid-reset-listener",
       "affectedScope": {
-        "description": "Affected HTTP/2 server or proxy request handler",
-        "component": "HTTP/2 request handler"
+        "description": "HTTP/2 protocol implementations supporting stream multiplexing and cancellation",
+        "vendor": "ietf",
+        "versions": [
+          {
+            "status": "affected",
+            "version": "2.0"
+          }
+        ]
       },
-      "vulnerableRole": "listener",
-      "interactionInitiator": "attacker-controlled-component",
-      "protocols": [
-        {"id": "http", "layer": "application", "version": "2"},
-        {"id": "tcp", "layer": "transport"}
-      ],
-      "trigger": {
-        "phase": "protocol-message-processing",
-        "artifact": "frame",
-        "directionAtBoundary": "remote-to-vulnerable",
-        "details": "Rapid request and RST_STREAM frame sequence"
+      "attackerAccess": {
+        "authentication": {
+          "requirement": "not-required"
+        },
+        "authorization": [],
+        "evidenceRefs": [
+          "ev-cve-desc"
+        ],
+        "executionPrivileges": [],
+        "resourcePermissions": []
       },
       "attackerRequirements": [
-        {"kind": "endpoint-control", "value": "remote-client"}
-      ],
-      "requiredPathCapabilities": ["remote-initiated-ingress"],
-      "preconditions": [
         {
-          "id": "affected-http2-handler",
-          "kind": "runtime-feature",
-          "description": "An affected HTTP/2 handler is enabled.",
-          "evidenceRefs": ["rapid-reset-analysis"]
+          "endpointRole": "remote-client",
+          "evidenceRefs": [
+            "ev-cve-desc"
+          ],
+          "id": "req-remote-client",
+          "kind": "endpoint-control"
         }
       ],
-      "taxonomyMappings": [],
       "confidence": "high",
-      "evidenceRefs": ["rapid-reset-analysis"]
+      "directOutcomes": [
+        {
+          "confidence": "high",
+          "description": "Uncontrolled server resource consumption leading to denial of service.",
+          "evidenceRefs": [
+            "ev-cve-desc"
+          ],
+          "locus": "vulnerable-component",
+          "outcomeId": "out-dos",
+          "primitive": "denial-of-service",
+          "privilegeObtained": "none"
+        }
+      ],
+      "evidenceRefs": [
+        "ev-cve-desc"
+      ],
+      "interactionInitiator": "attacker-controlled-component",
+      "mitigationAssessment": {
+        "options": [],
+        "status": "none-supported-by-collected-evidence"
+      },
+      "pathId": "path-http2-rapid-reset",
+      "preconditions": [
+        {
+          "description": "The target server has HTTP/2 protocol support enabled on its listening socket.",
+          "evidenceRefs": [
+            "ev-cve-desc"
+          ],
+          "id": "precond-http2-enabled",
+          "kind": "protocol",
+          "resolution": "narrative-only"
+        }
+      ],
+      "protocols": [
+        {
+          "id": "http2",
+          "layer": "application"
+        }
+      ],
+      "requiredPathCapabilities": [
+        "remote-initiated-ingress"
+      ],
+      "taxonomyMappings": [],
+      "trigger": {
+        "artifact": "frame",
+        "details": "The attacker sends HTTP/2 HEADERS frames immediately followed by RST_STREAM frames to rapidly create and cancel streams.",
+        "directionAtBoundary": "remote-to-vulnerable",
+        "phase": "protocol-message-processing"
+      },
+      "vulnerableRole": "listener"
     }
   ],
+  "cveId": "CVE-2023-44487",
   "evidence": [
     {
-      "evidenceId": "rapid-reset-analysis",
-      "sourceId": "rapid-reset-analysis",
-      "sourceType": "other",
-      "claim": "A client can create and immediately reset HTTP/2 streams while the server continues processing work.",
-      "locator": "How the attack works",
-      "pathRefs": ["http2-rapid-reset-listener"],
+      "claim": "The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly.",
+      "evidenceId": "ev-cve-desc",
+      "locator": "cna.descriptions[0].value",
+      "pathRefs": [
+        "path-http2-rapid-reset"
+      ],
+      "sourceId": "cve-list-v5",
+      "sourceType": "cve-record",
       "strength": "explicit"
     }
   ],
-  "notes": "Deployment reachability still requires an active affected HTTP/2 listener and an untrusted route."
+  "schemaVersion": "attack-path-profile/v2"
 }
 ```
 
@@ -194,56 +253,131 @@ and [Apache Log4j security advisory](https://logging.apache.org/security.html#CV
 
 ```json
 {
-  "schemaVersion": "attack-path-profile/v1",
-  "cveId": "CVE-2024-11053",
   "attackPaths": [
     {
-      "pathId": "curl-netrc-redirect",
       "affectedScope": {
-        "description": "Affected curl redirect and .netrc handling",
-        "product": "curl"
+        "description": "curl library and command-line tool",
+        "vendor": "curl",
+        "versions": [
+          {
+            "lessThanOrEqual": "8.11.0",
+            "status": "affected",
+            "version": "6.5",
+            "versionType": "semver"
+          }
+        ]
       },
-      "vulnerableRole": "client",
-      "interactionInitiator": "vulnerable-component",
-      "protocols": [
-        {"id": "http", "layer": "application"},
-        {"id": "tls", "layer": "security"},
-        {"id": "tcp", "layer": "transport"}
-      ],
-      "trigger": {
-        "phase": "remote-response-processing",
-        "artifact": "redirect",
-        "directionAtBoundary": "remote-to-vulnerable"
+      "attackerAccess": {
+        "authentication": {
+          "requirement": "not-required"
+        },
+        "authorization": [],
+        "evidenceRefs": [
+          "ev-1"
+        ],
+        "executionPrivileges": [],
+        "resourcePermissions": []
       },
       "attackerRequirements": [
-        {"kind": "endpoint-control", "value": "redirect-target"}
-      ],
-      "requiredPathCapabilities": ["vulnerable-component-initiated-egress"],
-      "preconditions": [
         {
-          "id": "netrc-and-redirects",
-          "kind": "configuration",
-          "description": "curl uses .netrc credentials, follows redirects, and the target entry omits the password.",
-          "evidenceRefs": ["curl-advisory-claim"]
+          "endpointRole": "redirect-target",
+          "evidenceRefs": [
+            "ev-1"
+          ],
+          "id": "req-1",
+          "kind": "endpoint-control"
         }
       ],
-      "taxonomyMappings": [],
       "confidence": "high",
-      "evidenceRefs": ["curl-advisory-claim"]
+      "directOutcomes": [
+        {
+          "confidence": "high",
+          "description": "Credentials (password) used for the initial host are leaked to the redirect target host.",
+          "evidenceRefs": [
+            "ev-1"
+          ],
+          "locus": "downstream-component",
+          "outcomeId": "out-1",
+          "primitive": "information-disclosure",
+          "privilegeObtained": "none"
+        }
+      ],
+      "evidenceRefs": [
+        "ev-1",
+        "ev-2"
+      ],
+      "interactionInitiator": "vulnerable-component",
+      "mitigationAssessment": {
+        "options": [],
+        "status": "none-supported-by-collected-evidence"
+      },
+      "notes": "Credential leakage occurs when netrc has a matching target host entry that lacks password credentials, causing curl to misapply the initial host's password to the redirect destination.",
+      "pathId": "path-1",
+      "preconditions": [
+        {
+          "description": "curl is configured to use a .netrc file containing credentials for the initial host and an entry for the redirect target host that omits the password or both login and password.",
+          "evidenceRefs": [
+            "ev-1"
+          ],
+          "id": "prec-netrc-config",
+          "kind": "configuration",
+          "resolution": "narrative-only"
+        },
+        {
+          "description": "HTTP redirect following is enabled in curl.",
+          "evidenceRefs": [
+            "ev-1"
+          ],
+          "id": "prec-follow-redirects",
+          "kind": "configuration",
+          "resolution": "narrative-only"
+        }
+      ],
+      "protocols": [
+        {
+          "id": "http",
+          "layer": "application"
+        }
+      ],
+      "requiredPathCapabilities": [
+        "vulnerable-component-initiated-egress"
+      ],
+      "taxonomyMappings": [],
+      "trigger": {
+        "artifact": "redirect",
+        "details": "curl receives an HTTP redirect response to a target host while configured to follow redirects and using netrc.",
+        "directionAtBoundary": "remote-to-vulnerable",
+        "phase": "remote-response-processing"
+      },
+      "vulnerableRole": "client"
     }
   ],
+  "cveId": "CVE-2024-11053",
   "evidence": [
     {
-      "evidenceId": "curl-advisory-claim",
-      "sourceId": "curl-advisory",
-      "sourceType": "vendor-advisory",
-      "claim": "Affected curl versions can reuse the first host's password after a redirect to a matching .netrc target entry.",
-      "locator": "CVE-2024-11053 vulnerability description",
-      "pathRefs": ["curl-netrc-redirect"],
+      "claim": "curl leaks initial host credentials to a redirected host when using .netrc if the redirect target host entry in netrc omits the password or both login and password.",
+      "evidenceId": "ev-1",
+      "locator": "containers.cna.descriptions[0].value",
+      "pathRefs": [
+        "path-1"
+      ],
+      "sourceId": "cve-list-v5",
+      "sourceType": "cve-record",
+      "strength": "explicit"
+    },
+    {
+      "claim": "curl versions from 6.5 up through 8.11.0 are affected.",
+      "evidenceId": "ev-2",
+      "locator": "containers.cna.affected[0].versions",
+      "pathRefs": [
+        "path-1"
+      ],
+      "sourceId": "cve-list-v5",
+      "sourceType": "cve-record",
       "strength": "explicit"
     }
   ],
-  "notes": "The vulnerable component must first connect or follow a redirect to the attacker-controlled target."
+  "schemaVersion": "attack-path-profile/v2"
 }
 ```
 
@@ -251,68 +385,270 @@ and [Apache Log4j security advisory](https://logging.apache.org/security.html#CV
 
 ```json
 {
-  "schemaVersion": "attack-path-profile/v1",
-  "cveId": "CVE-2021-44228",
   "attackPaths": [
     {
-      "pathId": "log4j-message-lookup",
       "affectedScope": {
-        "description": "Affected Log4j message lookup behavior",
-        "product": "Apache Log4j",
-        "component": "log4j-core"
+        "description": "Apache Log4j2 log4j-core JNDI lookup message substitution flaw",
+        "vendor": "Apache Software Foundation",
+        "versions": [
+          {
+            "lessThan": "2.15.0",
+            "status": "affected",
+            "version": "2.0-beta9",
+            "versionType": "custom"
+          },
+          {
+            "status": "unaffected",
+            "version": "2.3.1"
+          },
+          {
+            "status": "unaffected",
+            "version": "2.12.2"
+          },
+          {
+            "status": "unaffected",
+            "version": "2.15.0"
+          }
+        ]
       },
-      "vulnerableRole": "local-component",
-      "interactionInitiator": "upstream-component",
-      "protocols": [
-        {"id": "ldap", "layer": "application"},
-        {"id": "tcp", "layer": "transport"}
-      ],
-      "trigger": {
-        "phase": "local-invocation",
-        "artifact": "api-arguments",
-        "directionAtBoundary": "local-to-vulnerable"
+      "attackerAccess": {
+        "authentication": {
+          "requirement": "not-required"
+        },
+        "authorization": [],
+        "evidenceRefs": [
+          "ev-cve-desc"
+        ],
+        "executionPrivileges": [],
+        "resourcePermissions": []
       },
       "attackerRequirements": [
-        {"kind": "input-control", "value": "untrusted-input"},
-        {"kind": "endpoint-control", "value": "remote-endpoint"}
-      ],
-      "requiredPathCapabilities": [
-        "local-input-transfer",
-        "vulnerable-component-initiated-egress"
-      ],
-      "preconditions": [
         {
-          "id": "attacker-input-logged",
-          "kind": "api-usage",
-          "description": "Attacker-controlled data reaches a vulnerable log message or parameter.",
-          "evidenceRefs": ["apache-log4j-claim"]
+          "evidenceRefs": [
+            "ev-cve-desc"
+          ],
+          "id": "req-1",
+          "kind": "input-control",
+          "requirementValue": "untrusted-input"
         },
         {
-          "id": "jndi-callback-available",
-          "kind": "runtime-feature",
-          "description": "The affected JNDI lookup behavior can resolve an attacker-controlled remote endpoint.",
-          "evidenceRefs": ["apache-log4j-claim"]
+          "endpointRole": "remote-endpoint",
+          "evidenceRefs": [
+            "ev-cve-desc"
+          ],
+          "id": "req-2",
+          "kind": "endpoint-control"
         }
       ],
-      "taxonomyMappings": [],
       "confidence": "high",
-      "evidenceRefs": ["apache-log4j-claim"]
+      "directOutcomes": [
+        {
+          "confidence": "high",
+          "description": "Arbitrary code execution on the application host via attacker-controlled JNDI resource lookup.",
+          "evidenceRefs": [
+            "ev-cve-desc"
+          ],
+          "locus": "vulnerable-component",
+          "outcomeId": "out-1",
+          "primitive": "code-execution",
+          "privilegeObtained": "same-as-locus"
+        }
+      ],
+      "evidenceRefs": [
+        "ev-cve-desc"
+      ],
+      "interactionInitiator": "upstream-component",
+      "mitigationAssessment": {
+        "options": [
+          {
+            "conditions": [
+              {
+                "description": "Set system property log4j2.formatMsgNoLookups or environment variable LOG4J_FORMAT_MSG_NO_LOOKUPS to true.",
+                "evidenceRefs": [
+                  "ev-cve-desc"
+                ],
+                "id": "mit-1-condition-1",
+                "kind": "other",
+                "resolution": "narrative-only"
+              }
+            ],
+            "confidence": "high",
+            "controlKind": "configuration",
+            "description": "Disables message lookup substitution to prevent evaluation of JNDI expressions in log strings.",
+            "effect": "prevents-path",
+            "evidenceRefs": [
+              "ev-cve-desc"
+            ],
+            "mitigationId": "mit-1"
+          }
+        ],
+        "status": "documented"
+      },
+      "pathId": "path-1",
+      "preconditions": [
+        {
+          "description": "Log message lookup substitution is enabled.",
+          "evidenceRefs": [
+            "ev-cve-desc"
+          ],
+          "id": "pre-1",
+          "kind": "runtime-feature",
+          "resolution": "narrative-only"
+        }
+      ],
+      "protocols": [
+        {
+          "id": "ldap",
+          "layer": "application"
+        },
+        {
+          "id": "tcp",
+          "layer": "transport"
+        }
+      ],
+      "requiredPathCapabilities": [
+        "vulnerable-component-initiated-egress",
+        "local-input-transfer"
+      ],
+      "taxonomyMappings": [],
+      "trigger": {
+        "artifact": "api-arguments",
+        "details": "Application passes untrusted input containing a JNDI lookup pattern into the Log4j logging API.",
+        "directionAtBoundary": "local-to-vulnerable",
+        "phase": "local-invocation"
+      },
+      "vulnerableRole": "local-component"
     }
   ],
+  "cveId": "CVE-2021-44228",
   "evidence": [
     {
-      "evidenceId": "apache-log4j-claim",
-      "sourceId": "apache-log4j-advisory",
-      "sourceType": "vendor-advisory",
-      "claim": "Attacker-controlled log messages or parameters can cause Log4j to resolve an attacker-controlled JNDI endpoint.",
-      "locator": "CVE-2021-44228 advisory entry",
-      "pathRefs": ["log4j-message-lookup"],
+      "claim": "Apache Log4j2 JNDI features do not protect against attacker controlled LDAP endpoints, allowing remote code execution when message lookup substitution is enabled.",
+      "evidenceId": "ev-cve-desc",
+      "locator": "containers.cna.descriptions[0].value",
+      "pathRefs": [
+        "path-1"
+      ],
+      "sourceId": "cve-list-v5",
+      "sourceType": "cve-record",
       "strength": "explicit"
     }
   ],
-  "notes": "Local application behavior activates vulnerable code, which then initiates the network callback."
+  "schemaVersion": "attack-path-profile/v2"
 }
 ```
+
+### Mitigation assessment — CVE-2026-18649
+
+`mitigationAssessment` is the one part of a profile that can close a finding
+outright, so it is also the easiest to misread. Options are **alternatives**;
+the `conditions` inside a single option must **all** hold. Each option declares
+a `controlKind`, and only independent controls are published: upgrading to a
+fixed release is already carried by `affectedScope.versions`, so
+`version-upgrade` never appears here.
+
+This GStreamer RTP depayloader flaw carries four options across three kinds —
+enforce SRTP authentication, restrict who can send RTP, compile the plugin out,
+or derank the elements. Any one of them prevents the path. Only the
+`mitigationAssessment` block is shown; the full record is
+[`data/2026/CVE-2026-18649.json`](data/2026/CVE-2026-18649.json).
+
+Note every condition is `narrative-only`: the evidence supports the control but
+not a machine-checkable predicate, so a consumer routes these to an analyst
+rather than resolving them automatically.
+
+```json
+{
+  "options": [
+    {
+      "conditions": [
+        {
+          "description": "Deploy the srtpdec element in the pipeline prior to the depayloader.",
+          "evidenceRefs": [
+            "ev-2"
+          ],
+          "id": "mit-1-condition-1",
+          "kind": "other",
+          "resolution": "narrative-only"
+        }
+      ],
+      "confidence": "high",
+      "controlKind": "configuration",
+      "description": "Enforcing SRTP packet authentication causes unauthenticated RTP fragments to be rejected before reaching the depayloaders.",
+      "effect": "prevents-path",
+      "evidenceRefs": [
+        "ev-2"
+      ],
+      "mitigationId": "mit-1"
+    },
+    {
+      "conditions": [
+        {
+          "description": "Restrict network access to the GStreamer RTP receiving endpoints to trusted peers via firewall rules.",
+          "evidenceRefs": [
+            "ev-2"
+          ],
+          "id": "mit-2-condition-1",
+          "kind": "other",
+          "resolution": "narrative-only"
+        }
+      ],
+      "confidence": "high",
+      "controlKind": "access-restriction",
+      "description": "Network filtering prevents untrusted network entities from initiating RTP traffic streams to the vulnerable component.",
+      "effect": "prevents-path",
+      "evidenceRefs": [
+        "ev-2"
+      ],
+      "mitigationId": "mit-2"
+    },
+    {
+      "conditions": [
+        {
+          "description": "Compile the gstreamer-plugins-good package with the -Drtp=disabled meson build option.",
+          "evidenceRefs": [
+            "ev-2"
+          ],
+          "id": "mit-3-condition-1",
+          "kind": "other",
+          "resolution": "narrative-only"
+        }
+      ],
+      "confidence": "high",
+      "controlKind": "usage-change",
+      "description": "Disabling the RTP plugin completely omits the vulnerable RTP depayloader elements from the build.",
+      "effect": "prevents-path",
+      "evidenceRefs": [
+        "ev-2"
+      ],
+      "mitigationId": "mit-3"
+    },
+    {
+      "conditions": [
+        {
+          "description": "Set the GST_PLUGIN_FEATURE_RANK environment variable to rtph264depay:0,rtph265depay:0.",
+          "evidenceRefs": [
+            "ev-2"
+          ],
+          "id": "mit-4-condition-1",
+          "kind": "other",
+          "resolution": "narrative-only"
+        }
+      ],
+      "confidence": "high",
+      "controlKind": "configuration",
+      "description": "Setting the element ranks to 0 prevents GStreamer auto-plugging pipelines from automatically selecting the affected depayloaders.",
+      "effect": "prevents-path",
+      "evidenceRefs": [
+        "ev-2"
+      ],
+      "mitigationId": "mit-4"
+    }
+  ],
+  "status": "documented"
+}
+```
+
 
 ## Pipeline stages
 
@@ -330,12 +666,11 @@ and [Apache Log4j security advisory](https://logging.apache.org/security.html#CV
 | recovery model batch | Regenerate only truncated repairs with a smaller output budget and low thinking level | Vertex AI Gemini batch |
 | `reconcile` | Replace first-pass failures with repair outcomes without duplicating CVEs | Batch job |
 | `publish` | Add immutable run metadata to validated profiles; attach deterministic CVSS metadata | Batch job |
-| `registry-sync` | Merge immutable revisions into the registry and emit added or materially updated profiles | Batch job |
-| `export-current` | Rebuild stable CVE-keyed JSON objects from the canonical current registry view | Batch job or operator command |
+| `registry-sync` | Merge immutable revisions into the registry, emit added or materially updated profiles, and rebuild the stable CVE-keyed JSON objects served to consumers | Batch job |
 | consumer import | Join profiles to environment-specific evidence and analyst decisions | Any compatible triage or analysis tool |
 
 The model returns only the reusable core profile. Validation wraps it in
-`validated-attack-path-profile/v1` with provenance and review signals. The
+`validated-attack-path-profile/v2` with provenance and review signals. The
 stable CVE-keyed public projection emits
 `published-attack-path-profile/v2`, which adds a `cvss` array containing every
 CNA and ADP CVSS vector found in the mirrored CVE List V5 record (including
@@ -356,13 +691,16 @@ closed, and the specific inferences the procedure must refuse to make.
 
 The `data/` directory in this repository is a point-in-time export of the
 published dataset: one `published-attack-path-profile/v2` record per CVE,
-sorted into a folder per CVE year (`data/2021/CVE-2021-44228.json`, etc.). As
-of this snapshot (latest `publishedAt` 2026-08-13) it contains 15,020 profiles
-spanning CVE years 2004–2026. It is the same stable, CVE-keyed projection the
-live system serves at:
+sorted into a folder per CVE year (`data/2026/CVE-2026-17434.json`, etc.). This
+snapshot contains 998 profiles, every one carrying an `attack-path-profile/v2`
+core and validating against
+[`published-attack-path-profile-v2.schema.json`](schemas/published-attack-path-profile-v2.schema.json).
+Coverage today is the CVE-2026 backfill plus `CVE-2021-44228`, and expands as
+historical cohorts are run through the v2 pipeline. It is the same stable,
+CVE-keyed projection the live system serves at:
 
 ```text
-https://radar-trace.thearmory.cloud/cves/CVE-2026-2530.json
+https://radar-trace.thearmory.cloud/cves/CVE-2026-17434.json
 ```
 
 A consumer should use `profile.cveId` as its join key and combine a profile

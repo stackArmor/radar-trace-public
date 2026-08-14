@@ -10,13 +10,17 @@ This document describes the join a consumer performs to reach that conclusion
 themselves, and the inferences that join must refuse to make.
 
 > **Applies to the `attack-path-profile/v2` core contract**
-> ([schema](../schemas/attack-path-profile-v2.schema.json)). The current
-> `data/` snapshot predates it: every published record in this repository
-> carries an `attack-path-profile/v1` core, which has no `attackerAccess`,
-> `directOutcomes`, `mitigationAssessment`, or structured condition atoms.
-> Gates G1, G3, G4, and G5 below therefore cannot be evaluated against the
-> present snapshot. Treat this as the procedure the v2 corpus is being built
-> for, not one you can run against `data/` today.
+> ([schema](../schemas/attack-path-profile-v2.schema.json)). Every published
+> record in `data/` now carries a v2 core, so every gate below is evaluable
+> against the present snapshot, including the ones that depend on
+> `attackerAccess`, `directOutcomes`, `mitigationAssessment`, and structured
+> condition atoms.
+>
+> Two caveats on what the current corpus can decide. Conditions are published as
+> `narrative-only`, so G4 routes to an analyst rather than resolving
+> automatically. And most records report
+> `none-supported-by-collected-evidence`, which carries no information: G1
+> short-circuits only for the minority with a documented control.
 
 ## Four dispositions
 
@@ -65,6 +69,7 @@ flowchart TD
 
     IN --> G0
     G0 -- "not affected" --> NA
+    G0 -- "identity unresolvable" --> IND
     G0 --> G1
     G1 -- "prevents-path satisfied" --> REF
     G1 --> G2
@@ -77,7 +82,7 @@ flowchart TD
     G4 -- "condition false" --> REF
     G4 -- "narrative-only / unknown" --> IND
     G4 --> G5
-    G5 --> OPEN
+    G5 -- "locus selects the asset to inspect" --> OPEN
 
     classDef refuted stroke:#0B7261,stroke-width:2px;
     classDef indeterminate stroke:#A26A04,stroke-width:2px;
@@ -105,8 +110,15 @@ package you do not.
 
 | Branch | Condition |
 | --- | --- |
-| `NOT-APPLICABLE` | Version outside range, or the profile's product is not this package. |
+| `NOT-APPLICABLE` | Version outside range, or the profile's product is *positively* not this package. |
+| `INDETERMINATE` | Package identity cannot be resolved: no `purl`, an ambiguous match, or a vendored or rebundled copy whose version cannot be established. |
 | Continue | Scanner reports the package affected and the package identity matches. |
+
+`NOT-APPLICABLE` closes a finding, so it is subject to the governing rule like
+any other closing branch: it needs a positive fact, either a version outside the
+published range or a product that is demonstrably not the one installed. An
+identity you merely failed to resolve is not that fact, and closing on it is the
+same false negative this procedure exists to prevent. Route it to an analyst.
 
 ### G1 — Mitigation short-circuit
 

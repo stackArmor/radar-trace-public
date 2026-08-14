@@ -9,8 +9,6 @@
     "profile",
     "reviewRecommended",
     "reviewReasons",
-    "provenance",
-    "publication",
     "cvss"
   ],
   "properties": {
@@ -42,15 +40,52 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["version", "vector", "source", "metric"],
+        "required": [
+          "version",
+          "vector",
+          "source",
+          "metric"
+        ],
         "properties": {
-          "version": {"enum": ["2.0", "3.0", "3.1", "4.0"]},
-          "vector": {"type": "string", "minLength": 1},
-          "source": {"enum": ["cna", "adp"]},
-          "sourceIndex": {"type": "integer", "minimum": 0},
-          "metric": {"enum": ["cvssV2", "cvssV3_0", "cvssV3_1", "cvssV4_0"]},
-          "baseScore": {"type": "number", "minimum": 0, "maximum": 10},
-          "baseSeverity": {"type": "string", "minLength": 1}
+          "version": {
+            "enum": [
+              "2.0",
+              "3.0",
+              "3.1",
+              "4.0"
+            ]
+          },
+          "vector": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "enum": [
+              "cna",
+              "adp"
+            ]
+          },
+          "sourceIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "metric": {
+            "enum": [
+              "cvssV2",
+              "cvssV3_0",
+              "cvssV3_1",
+              "cvssV4_0"
+            ]
+          },
+          "baseScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "baseSeverity": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     }
@@ -79,5 +114,6 @@
         }
       }
     }
-  ]
+  ],
+  "description": "Public per-CVE projection of a validated v2 profile. provenance and publication are optional: the stable objects served to consumers omit the run audit trail, which is retained on the internal publish artifact and in the BigQuery revision history."
 }

@@ -2058,7 +2058,6 @@
         "taxonomyVersion",
         "taxonomyId",
         "relationship",
-        "confidence",
         "evidenceRefs"
       ],
       "properties": {
@@ -2080,9 +2079,6 @@
         },
         "relationship": {
           "$ref": "#/$defs/taxonomyRelationship"
-        },
-        "confidence": {
-          "$ref": "#/$defs/confidence"
         },
         "evidenceRefs": {
           "$ref": "#/$defs/evidenceRefs"

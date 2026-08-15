@@ -25,25 +25,9 @@ infrastructure.
 
 ## Current public snapshot
 
-The current `data/` snapshot holds the 2,988 profiles published so far under the
-v2 contract: the CVE-2026 backfill plus `CVE-2021-44228`, `CVE-2023-44487`, and
-`CVE-2024-11053`, re-analysed under v2 because they are referenced as examples
-below.
-
-Every CAPEC mapping in the snapshot is derived from the CVE's CNA-assigned CWE
-and the curated CWE-to-pattern relationships MITRE publishes, rather than chosen
-by the model. All of them are `related-to`: the catalog states which weaknesses
-an attack pattern exploits, not which CVEs instantiate it, so a mapping is
-materially related without fully characterizing the path. `provenance` records
-the CAPEC release each derivation came from.
-
-Coverage grows from here. The v2 contract and the pipeline that produces it are
-settled, so extending the corpus is a matter of running historical cohorts
-through it; snapshots are refreshed as those batches complete. Earlier years
-currently published under the superseded v1 core are re-analysed rather than
-converted, because v2 records fields v1 never captured.
-
-This snapshot is not the complete private registry.
+The `data/` directory is a sample of the corpus, published under the v2 contract
+to show what a profile looks like and to let consumers validate against the
+schemas shipped alongside it. It is not the complete registry.
 
 ## Architecture
 
@@ -699,13 +683,11 @@ closed, and the specific inferences the procedure must refuse to make.
 
 The `data/` directory in this repository is a point-in-time export of the
 published dataset: one `published-attack-path-profile/v2` record per CVE,
-sorted into a folder per CVE year (`data/2026/CVE-2026-17434.json`, etc.). This
-snapshot contains 998 profiles, every one carrying an `attack-path-profile/v2`
-core and validating against
+sorted into a folder per CVE year (`data/2026/CVE-2026-17434.json`, etc.). It is
+a sample of the corpus rather than the complete registry, every record carrying
+an `attack-path-profile/v2` core and validating against
 [`published-attack-path-profile-v2.schema.json`](schemas/published-attack-path-profile-v2.schema.json).
-Coverage today is the CVE-2026 backfill plus `CVE-2021-44228`, and expands as
-historical cohorts are run through the v2 pipeline. It is the same stable,
-CVE-keyed projection the live system serves at:
+It is the same stable, CVE-keyed projection the live system serves at:
 
 ```text
 https://radar-trace.thearmory.cloud/cves/CVE-2026-17434.json

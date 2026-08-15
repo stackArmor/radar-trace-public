@@ -25,9 +25,16 @@ infrastructure.
 
 ## Current public snapshot
 
-The current `data/` snapshot holds the 998 profiles published so far under the
+The current `data/` snapshot holds the 2,986 profiles published so far under the
 v2 contract: the CVE-2026 backfill plus `CVE-2021-44228`, re-analysed under v2
 because it is referenced as an example below.
+
+Every CAPEC mapping in the snapshot is derived from the CVE's CNA-assigned CWE
+and the curated CWE-to-pattern relationships MITRE publishes, rather than chosen
+by the model. All of them are `related-to`: the catalog states which weaknesses
+an attack pattern exploits, not which CVEs instantiate it, so a mapping is
+materially related without fully characterizing the path. `provenance` records
+the CAPEC release each derivation came from.
 
 Coverage grows from here. The v2 contract and the pipeline that produces it are
 settled, so extending the corpus is a matter of running historical cohorts

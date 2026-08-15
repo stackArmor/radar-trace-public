@@ -141,8 +141,8 @@
         },
         "taxonomyMappings": {
           "type": "array",
-          "maxItems": 16,
-          "description": "Optional evidence-backed mappings from this concrete CVE path to CAPEC attack patterns. An empty array means no defensible mapping was established.",
+          "maxItems": 128,
+          "description": "Optional evidence-backed mappings from this concrete CVE path to CAPEC attack patterns, derived from the CVE's assigned CWE and the curated CWE-to-pattern relationships MITRE publishes. An empty array means no defensible mapping was established. The cap only guards against runaway output: a broad weakness legitimately reaches dozens of patterns, CWE-200 reaching 59, and dropping the curated tail to fit a smaller cap would discard real mappings.",
           "items": {
             "$ref": "#/$defs/taxonomyMapping"
           }
@@ -223,8 +223,8 @@
         },
         "versions": {
           "type": "array",
-          "maxItems": 128,
-          "description": "Machine-readable affected and unaffected version statements using CVE Record Format field names.",
+          "maxItems": 512,
+          "description": "Machine-readable affected and unaffected version statements using CVE Record Format field names. This is a faithful copy of the CVE-native version facts, so the cap only guards against runaway output: a CNA that enumerates every affected build rather than stating a range routinely publishes well over a hundred entries.",
           "items": {
             "$ref": "#/$defs/affectedVersion"
           }
@@ -961,12 +961,14 @@
         "realm": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 256
+          "maxLength": 256,
+          "description": "Identity realm the account belongs to. Omit it for not-required, not-applicable, and unknown, which involve no authenticated identity."
         },
         "role": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 256
+          "maxLength": 256,
+          "description": "The named product role the identity must hold. Set it only with requirement specific-role, and only for a role the product actually names. Omit it for every other requirement, including administrative and valid-account, which already carry the access level themselves; describing the account in prose here is not permitted."
         }
       },
       "allOf": [
@@ -2290,6 +2292,12 @@
         "profileFingerprint": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
+        },
+        "capecVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "CAPEC catalog release the taxonomyMappings were derived from. Recorded even when no mapping resulted, so records whose emptiness predates a catalog update can be found without re-deriving every record."
         },
         "modelVersion": {
           "type": "string",

@@ -23,8 +23,11 @@ excludes rather than leaving it implied.
 `attack-path-profile-v1.schema.json` is the superseded
 `attack-path-profile/v1` contract: the same generic core without attacker
 access, direct outcomes, mitigation assessment, or structured condition atoms.
-It remains immutable and readable so historical records stay interpretable, but
-nothing in `data/` uses it.
+It is kept for historical records and is otherwise closed to change. It was
+amended once, alongside v2, to remove the CAPEC attack-pattern mapping, its two
+`$defs`, and the `capec` evidence source type: the identifier is a table join
+over the CVE's assigned CWE and adds nothing a consumer cannot compute. Records
+published before that amendment are brought forward with `strip-capec`.
 
 ## Envelopes
 

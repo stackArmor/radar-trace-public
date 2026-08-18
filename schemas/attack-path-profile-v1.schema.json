@@ -61,7 +61,6 @@
         "attackerRequirements",
         "requiredPathCapabilities",
         "preconditions",
-        "taxonomyMappings",
         "confidence",
         "evidenceRefs"
       ],
@@ -119,14 +118,6 @@
           "description": "All configuration, state, feature, or execution conditions required for this path. Model alternatives as separate attackPaths entries.",
           "items": {
             "$ref": "#/$defs/precondition"
-          }
-        },
-        "taxonomyMappings": {
-          "type": "array",
-          "maxItems": 16,
-          "description": "Optional evidence-backed mappings from this concrete CVE path to CAPEC attack patterns. An empty array means no defensible mapping was established.",
-          "items": {
-            "$ref": "#/$defs/taxonomyMapping"
           }
         },
         "confidence": {
@@ -2162,60 +2153,6 @@
         }
       ]
     },
-    "taxonomyMapping": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "taxonomyName",
-        "taxonomyVersion",
-        "taxonomyId",
-        "relationship",
-        "confidence",
-        "evidenceRefs"
-      ],
-      "properties": {
-        "taxonomyName": {
-          "const": "CAPEC",
-          "description": "The mapped external taxonomy. CAPEC is the supported attack-pattern taxonomy for this contract."
-        },
-        "taxonomyVersion": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "description": "Version of CAPEC used for the mapping."
-        },
-        "taxonomyId": {
-          "type": "string",
-          "pattern": "^CAPEC-[1-9][0-9]*$",
-          "maxLength": 32,
-          "description": "CAPEC attack-pattern identifier."
-        },
-        "relationship": {
-          "$ref": "#/$defs/taxonomyRelationship"
-        },
-        "confidence": {
-          "$ref": "#/$defs/confidence"
-        },
-        "evidenceRefs": {
-          "$ref": "#/$defs/evidenceRefs"
-        }
-      }
-    },
-    "taxonomyRelationship": {
-      "description": "Relationship between this concrete CVE attack path and the CAPEC pattern.",
-      "oneOf": [
-        {
-          "const": "instance-of",
-          "title": "Instance of",
-          "description": "The CVE attack path is a concrete instance of the CAPEC attack pattern."
-        },
-        {
-          "const": "related-to",
-          "title": "Related to",
-          "description": "The CAPEC pattern is materially related but does not fully characterize the CVE attack path."
-        }
-      ]
-    },
     "confidence": {
       "description": "Strength of evidence supporting this path as a whole.",
       "oneOf": [
@@ -2335,11 +2272,6 @@
           "const": "nuclei-template",
           "title": "Nuclei template",
           "description": "Nuclei template used only as supporting evidence for its concrete test behavior."
-        },
-        {
-          "const": "capec",
-          "title": "CAPEC",
-          "description": "MITRE CAPEC attack-pattern record used to support an external taxonomy mapping."
         },
         {
           "const": "other",

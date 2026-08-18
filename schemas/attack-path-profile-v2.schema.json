@@ -64,7 +64,6 @@
         "preconditions",
         "directOutcomes",
         "mitigationAssessment",
-        "taxonomyMappings",
         "confidence",
         "evidenceRefs"
       ],
@@ -138,14 +137,6 @@
         },
         "mitigationAssessment": {
           "$ref": "#/$defs/mitigationAssessment"
-        },
-        "taxonomyMappings": {
-          "type": "array",
-          "maxItems": 128,
-          "description": "Optional evidence-backed mappings from this concrete CVE path to CAPEC attack patterns, derived from the CVE's assigned CWE and the curated CWE-to-pattern relationships MITRE publishes. An empty array means no defensible mapping was established. The cap only guards against runaway output: a broad weakness legitimately reaches dozens of patterns, CWE-200 reaching 59, and dropping the curated tail to fit a smaller cap would discard real mappings.",
-          "items": {
-            "$ref": "#/$defs/taxonomyMapping"
-          }
         },
         "confidence": {
           "$ref": "#/$defs/confidence"
@@ -2050,56 +2041,6 @@
         }
       ]
     },
-    "taxonomyMapping": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "taxonomyName",
-        "taxonomyVersion",
-        "taxonomyId",
-        "relationship",
-        "evidenceRefs"
-      ],
-      "properties": {
-        "taxonomyName": {
-          "const": "CAPEC",
-          "description": "The mapped external taxonomy. CAPEC is the supported attack-pattern taxonomy for this contract."
-        },
-        "taxonomyVersion": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "description": "Version of CAPEC used for the mapping."
-        },
-        "taxonomyId": {
-          "type": "string",
-          "pattern": "^CAPEC-[1-9][0-9]*$",
-          "maxLength": 32,
-          "description": "CAPEC attack-pattern identifier."
-        },
-        "relationship": {
-          "$ref": "#/$defs/taxonomyRelationship"
-        },
-        "evidenceRefs": {
-          "$ref": "#/$defs/evidenceRefs"
-        }
-      }
-    },
-    "taxonomyRelationship": {
-      "description": "Relationship between this concrete CVE attack path and the CAPEC pattern.",
-      "oneOf": [
-        {
-          "const": "instance-of",
-          "title": "Instance of",
-          "description": "The CVE attack path is a concrete instance of the CAPEC attack pattern."
-        },
-        {
-          "const": "related-to",
-          "title": "Related to",
-          "description": "The CAPEC pattern is materially related but does not fully characterize the CVE attack path."
-        }
-      ]
-    },
     "confidence": {
       "description": "Strength of evidence supporting the path, outcome, mitigation, or mapping that carries this value. It is not exploit likelihood or source completeness.",
       "oneOf": [
@@ -2221,11 +2162,6 @@
           "description": "Nuclei template used only as supporting evidence for its concrete test behavior."
         },
         {
-          "const": "capec",
-          "title": "CAPEC",
-          "description": "MITRE CAPEC attack-pattern record used to support an external taxonomy mapping."
-        },
-        {
           "const": "other",
           "title": "Other source",
           "description": "Another explicitly identified source type."
@@ -2288,12 +2224,6 @@
         "profileFingerprint": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
-        },
-        "capecVersion": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 32,
-          "description": "CAPEC catalog release the taxonomyMappings were derived from. Recorded even when no mapping resulted, so records whose emptiness predates a catalog update can be found without re-deriving every record."
         },
         "modelVersion": {
           "type": "string",

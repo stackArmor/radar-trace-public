@@ -56,10 +56,16 @@ contract changes, or the caller forces a re-run.
 Each profile contains a compact set of materially distinct paths rather than an
 entire exploit graph. The portable
 [attack-path profile JSON Schema](schemas/attack-path-profile-v2.schema.json)
-is the current canonical `attack-path-profile/v2` contract. Version 1 remains
-immutable and readable for historical records. Every discrete taxonomy value
-has a title and definition in the schema; source IDs, locators, package
-identities, version statements, and protocol versions remain extensible.
+is the current canonical `attack-path-profile/v2` contract. Version 1 stays
+readable for historical records and is otherwise closed to change. Every discrete
+taxonomy value has a title and definition in the schema; source IDs, locators,
+package identities, version statements, and protocol versions remain extensible.
+
+Neither version carries a CAPEC attack-pattern mapping. The identifier is a table
+join over the CVE's assigned CWE, which the record already carries and every
+scanner already reports, so publishing the join result pinned each profile to a
+catalog release without telling a consumer anything it could not compute.
+Records published before the removal are brought forward with `strip-capec`.
 
 The v2 contract makes ownership explicit for attacker access, direct outcomes,
 mitigation assessment, and narrative-only conditions while preserving the
@@ -68,22 +74,13 @@ inbound-versus-outbound path semantics. The published v2 envelope is defined by
 
 An `attackPaths` entry describes one affected scope and one immediate vulnerable
 boundary. Entries are alternatives. Within an entry, `attackerRequirements`,
-`requiredPathCapabilities`, and `preconditions` are three CAPEC-compatible
-prerequisite families and form an AND-set: every listed item is necessary.
-`protocols` is a descriptive set; a strict
-protocol requirement belongs in a typed precondition. Deployment
-labels such as `internet-facing` or `cluster-internal` are intentionally absent;
-they describe where software is deployed, not the generic CVE path. A consumer
-resolves `remote-initiated-ingress`, for example, against its own routes, policy,
-and runtime evidence.
-
-The three prerequisite families align conceptually with CAPEC attack
-prerequisites while retaining typed fields that a workload-aware consumer can
-resolve. Optional `taxonomyMappings` associate a concrete CVE path with a CAPEC
-pattern as `instance-of` or `related-to`; RADAR TRACE does not reproduce CAPEC's
-full ordered execution-flow model. A CAPEC record or another source that states
-the mapping must be supplied as evidence; the model does not derive CAPEC IDs
-from CWE or CVSS alone.
+`requiredPathCapabilities`, and `preconditions` are three prerequisite families
+and form an AND-set: every listed item is necessary. `protocols` is a
+descriptive set; a strict protocol requirement belongs in a typed precondition.
+Deployment labels such as `internet-facing` or `cluster-internal` are
+intentionally absent; they describe where software is deployed, not the generic
+CVE path. A consumer resolves `remote-initiated-ingress`, for example, against
+its own routes, policy, and runtime evidence.
 
 `affectedScope.packages` preserves the CVE Record Format `collectionURL` and
 `packageName` pair and may add a deterministically derived `purl`.
@@ -101,7 +98,6 @@ a human-readable range.
 | `attackerRequirements` | Which typed endpoint-control, network-position, input-control, or local-access prerequisites must the attacker satisfy? |
 | `requiredPathCapabilities` | Which capabilities must all exist: remote-initiated ingress, vulnerable-component-initiated egress, on-path interception, peer networking, or local input transfer? |
 | `preconditions` | Which typed version, configuration, feature, protocol, dependency, state, authentication, topology, or user-action conditions constrain the path? |
-| `taxonomyMappings` | Which evidence-backed CAPEC patterns describe or relate to this concrete path? |
 | `confidence` and `evidenceRefs` | How strongly is the path supported, and which exact claims support it? |
 | `evidence` | Which collected source contains each claim, where it appears, which paths it bears on, and whether it is explicit, inferred, corroborating, or contradictory? |
 
@@ -110,6 +106,25 @@ says that the attacker controls the initiating endpoint; it does not claim the
 endpoint is on the public internet. Likewise, `remote-endpoint` says the
 vulnerable component contacts an attacker-controlled destination; it does not
 claim that egress is permitted in a specific deployment.
+
+### Separating attacker control from path capability
+
+While `attackerRequirements` and `requiredPathCapabilities` may appear correlated
+in direct perimeter flaws, they represent two strictly orthogonal dimensions:
+
+- **`attackerRequirements`** defines **who or what the attacker controls** (e.g., an initiating client, a callback endpoint, an on-path position, or untrusted input).
+- **`requiredPathCapabilities`** defines **what communication capability must exist on the wire** (e.g., ingress, egress, peer networking, or local input transfer).
+
+Keeping them distinct avoids composite enum explosions and allows consumers to evaluate network routing rules (firewalls, NetworkPolicies) independently from trust boundaries and identity access.
+
+| Vulnerability pattern | `attackerRequirements` | `requiredPathCapabilities` | Why they diverge |
+| --- | --- | --- | --- |
+| **Inbound listener flaw** (e.g., CVE-2023-44487 HTTP/2) | `endpointRole: remote-client` | `remote-initiated-ingress` | Baseline case where they align: attacker directly operates the connecting endpoint. |
+| **Outbound redirect leak** (e.g., CVE-2024-11053 curl) | `endpointRole: redirect-target` | `vulnerable-component-initiated-egress` | Attacker controls a redirect destination; component follows redirect and leaks data via egress. |
+| **Direct SSRF / Outbound callback** | `endpointRole: remote-endpoint` | `vulnerable-component-initiated-egress` | Attacker supplies a target destination that the component contacts directly. |
+| **Local trigger with callback** (e.g., CVE-2021-44228 Log4j) | `requirementValue: untrusted-input` and `endpointRole: remote-endpoint` | `local-input-transfer` and `vulnerable-component-initiated-egress` | Attacker taints an input payload and runs a callback server; requires local data transfer and egress. |
+| **On-path tampering / MitM** | `requirementValue: traffic-path` | `on-path-interception` | Attacker controls neither endpoint; they manipulate transit between legitimate endpoints. |
+| **Internal service behind proxy** | `requirementValue: untrusted-input` | `remote-initiated-ingress` | The ingress socket connects to a trusted internal proxy, but the processed payload is attacker-controlled. |
 
 Structurally valid profiles with `low` confidence, unresolved material fields,
 or contradictory evidence remain publishable but carry
@@ -213,7 +228,6 @@ and [Apache Log4j security advisory](https://logging.apache.org/security.html#CV
       "requiredPathCapabilities": [
         "remote-initiated-ingress"
       ],
-      "taxonomyMappings": [],
       "trigger": {
         "artifact": "frame",
         "details": "The attacker sends HTTP/2 HEADERS frames immediately followed by RST_STREAM frames to rapidly create and cancel streams.",
@@ -334,7 +348,6 @@ and [Apache Log4j security advisory](https://logging.apache.org/security.html#CV
       "requiredPathCapabilities": [
         "vulnerable-component-initiated-egress"
       ],
-      "taxonomyMappings": [],
       "trigger": {
         "artifact": "redirect",
         "details": "curl receives an HTTP redirect response to a target host while configured to follow redirects and using netrc.",
@@ -502,7 +515,6 @@ and [Apache Log4j security advisory](https://logging.apache.org/security.html#CV
         "vulnerable-component-initiated-egress",
         "local-input-transfer"
       ],
-      "taxonomyMappings": [],
       "trigger": {
         "artifact": "api-arguments",
         "details": "Application passes untrusted input containing a JNDI lookup pattern into the Log4j logging API.",

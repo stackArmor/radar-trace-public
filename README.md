@@ -691,6 +691,9 @@ the requirements should be tested in, the four dispositions a finding can
 resolve to, why failing to prove a path open is not the same as proving it
 closed, and the specific inferences the procedure must refuse to make.
 
+[Validation](docs/validation.md) documents how published profiles are
+challenged by blind cross-model adversarial review and the current results.
+
 ## Data snapshot
 
 The `data/` directory in this repository is a point-in-time export of the
